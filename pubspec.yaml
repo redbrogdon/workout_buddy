@@ -1,0 +1,26 @@
+name: workout_buddy
+description: "A GenUI-based workout buddy."
+publish_to: 'none' 
+version: 1.0.0+1
+
+environment:
+  sdk: '>=3.10.0 <4.0.0'
+
+dependencies:
+  flutter:
+    sdk: flutter
+  cupertino_icons: ^1.0.8
+  genui: ^0.5.1
+  genui_firebase_ai: ^0.5.1
+  firebase_core: ^4.2.1
+  shared_preferences: ^2.5.3
+  json_schema_builder: ^0.1.3
+  firebase_ai: ^3.6.0
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^4.0.0
+
+flutter:
+  uses-material-design: true
