@@ -11,18 +11,6 @@ import 'package:json_schema_builder/json_schema_builder.dart';
 
 import 'firebase_options.dart';
 
-sealed class Message {}
-
-class SurfaceIdMessage extends Message {
-  final String surfaceId;
-  SurfaceIdMessage(this.surfaceId);
-}
-
-class TextMessage extends Message {
-  final String text;
-  TextMessage(this.text);
-}
-
 void main() async {
   configureGenUiLogging(
     logCallback: (level, msg) => debugPrint('GenUI $level: $msg'),
@@ -61,10 +49,10 @@ class _MyHomePageState extends State<MyHomePage> {
   final _textController = TextEditingController();
   final _scrollController = ScrollController();
   late final GenUiConversation conversation;
-  final _messages = <Message>[];
+  final _surfaceIds = <String>[];
 
   void _onSurfaceAdded(SurfaceAdded update) {
-    setState(() => _messages.add(SurfaceIdMessage(update.surfaceId)));
+    setState(() => _surfaceIds.add(update.surfaceId));
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (_scrollController.hasClients) {
         _scrollController.animateTo(
@@ -78,14 +66,13 @@ class _MyHomePageState extends State<MyHomePage> {
 
   void _onSurfaceDeleted(SurfaceRemoved update) {
     setState(
-      () => _messages.removeWhere(
-        (s) => s is SurfaceIdMessage && s.surfaceId == update.surfaceId,
-      ),
+      () => _surfaceIds.remove(update.surfaceId),
     );
   }
 
   void _onTextAdded(String text) {
-    setState(() => _messages.add(TextMessage(text)));
+    final snackBar = SnackBar(content: Text(text));
+    ScaffoldMessenger.of(context).showSnackBar(snackBar);
   }
 
   Future<void> _sendMessage(String text) async {
@@ -154,21 +141,19 @@ class _MyHomePageState extends State<MyHomePage> {
           3. Once I accept the workout plan, you will lead me through each of the
              exercises in the plan, one at a time, beginning with the first. Include
              **only the exercises in the plan I agreed to**. To
-             do so, follow these steps for each exercise:
-             - Generate a RepsCard for the exercise and display it in a new surface. Use
-               a new RepsCard for each exercise.
-             - **Stop and wait for a confirmation from me. Do not proceed until I indicate the
-               exercise is complete.**
-             - You will receive a completeAction event when I complete the exercise.
-               After that, repeat this Step 3 with the next uncompleted exercise. If
-               all of them are completed, proceed to step four.
+             do so, follow these steps for each exercise, one at a time:
+             - Generate a RepsCard for the exercise and display it in a new surface.
+               **Use a new RepsCard for each exercise.**
+             - **Stop and wait for a confirmation from me. Do not proceed until you
+               receive a completeAction event, which will indicate I've completed the
+               exercise.**
+             - Mark the exercise as completed, updating the relevant UI surface.
+             - Congratulate me for completing the exercise, and include the number of
+               repos completed in your message.
+             - Restart Step 3 with the next uncompleted exercise, if one exists.
           
-          4. When all the exercises have been completed, do the following:
-             - Delete all the existing UI surfaces.
-             - Create a plain text summary of the what exercises I did and how many
-               repetitions I reported were completed. Include one sentence
-               telling me whether or not I did a good job. All text should be on one line.
-             - Create a new UI surface to dispolay the text summary.
+          4. When all the exercises have been completed, congratulate me on being
+             finished.
 ''',
     );
     conversation = GenUiConversation(
@@ -192,15 +177,13 @@ class _MyHomePageState extends State<MyHomePage> {
           Expanded(
             child: ListView.builder(
               controller: _scrollController,
-              itemCount: _messages.length,
+              itemCount: _surfaceIds.length,
               itemBuilder: (context, index) {
-                return switch (_messages[index]) {
-                  SurfaceIdMessage msg => GenUiSurface(
-                    host: conversation.host,
-                    surfaceId: msg.surfaceId,
-                  ),
-                  TextMessage msg => Text(msg.text),
-                };
+                final id = _surfaceIds[index];
+                return GenUiSurface(
+                  host: conversation.host,
+                  surfaceId: id,
+                );
               },
             ),
           ),
@@ -493,72 +476,3 @@ class _RepsCardState extends State<RepsCard> {
     );
   }
 }
-
-// final timerCard = CatalogItem(
-//   name: 'TimerCard',
-//   dataSchema: _schema,
-//   widgetBuilder: (itemContext) {
-//     final json = itemContext.data as Map<String, Object?>;
-//     final title = json['title'] as String;
-//     final exercises = (json['exercises'] as List<dynamic>)
-//         .map((s) => s.toString())
-//         .toList();
-
-//     return WorkoutCard(
-//       title: title,
-//       exercises: exercises,
-//     );
-//   },
-// );
-
-// class TimerCard extends StatelessWidget {
-//   final String title;
-//   final List<String> exercises;
-
-//   const TimerCard({
-//     super.key,
-//     required this.title,
-//     required this.exercises,
-//   });
-
-//   @override
-//   Widget build(BuildContext context) {
-//     final theme = Theme.of(context);
-//     return Card(
-//       elevation: 4,
-//       margin: const EdgeInsets.symmetric(vertical: 16.0, horizontal: 16.0),
-//       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-//       child: Column(
-//         crossAxisAlignment: CrossAxisAlignment.stretch,
-//         children: [
-//           Padding(
-//             padding: const EdgeInsets.all(16.0),
-//             child: Text(
-//               title,
-//               style: theme.textTheme.headlineSmall?.copyWith(
-//                 fontWeight: FontWeight.bold,
-//                 fontStyle: FontStyle.italic,
-//               ),
-//             ),
-//           ),
-//           const Divider(),
-//           Padding(
-//             padding: const EdgeInsets.all(16.0),
-//             child: Wrap(
-//               spacing: 8.0,
-//               runSpacing: 8.0,
-//               children: exercises
-//                   .map(
-//                     (exercise) => Chip(
-//                       avatar: const Icon(Icons.fitness_center),
-//                       label: Text(exercise),
-//                     ),
-//                   )
-//                   .toList(),
-//             ),
-//           ),
-//         ],
-//       ),
-//     );
-//   }
-// }
