@@ -5,6 +5,7 @@
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_ai/firebase_ai.dart';
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:genui/genui.dart';
 import 'package:genui_firebase_ai/genui_firebase_ai.dart';
 import 'package:json_schema_builder/json_schema_builder.dart';
@@ -28,12 +29,60 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       title: 'Flutter Demo',
-      theme: ThemeData(
-        colorScheme: ColorScheme.fromSeed(seedColor: Colors.blue),
-      ),
+      theme: _buildTheme(Brightness.light),
+      darkTheme: _buildTheme(Brightness.dark),
+      themeMode: ThemeMode.system,
       home: const MyHomePage(title: 'Workout Companion'),
     );
   }
+}
+
+ThemeData _buildTheme(Brightness brightness) {
+  final isDark = brightness == Brightness.dark;
+
+  // Stitch Colors
+  const primary = Color(0xFF6D28D9);
+
+  final background = isDark ? const Color(0xFF111111) : const Color(0xFFF3F4F6);
+  final card = isDark ? const Color(0xFF1F1F1F) : const Color(0xFFFFFFFF);
+  final text = isDark ? const Color(0xFFF9FAFB) : const Color(0xFF111827);
+  final textSecondary = isDark
+      ? const Color(0xFF9CA3AF)
+      : const Color(0xFF6B7280);
+  final subtle = isDark ? const Color(0xFF374151) : const Color(0xFFE5E7EB);
+
+  final baseTheme = isDark ? ThemeData.dark() : ThemeData.light();
+
+  return baseTheme.copyWith(
+    scaffoldBackgroundColor: background,
+    colorScheme: baseTheme.colorScheme.copyWith(
+      primary: primary,
+      onPrimary: Colors.white,
+      surface: card,
+      onSurface: text,
+      onSurfaceVariant: textSecondary,
+      surfaceContainerHighest: subtle, // For subtle/background elements
+      background: background,
+    ),
+    textTheme: GoogleFonts.interTextTheme(baseTheme.textTheme).apply(
+      bodyColor: text,
+      displayColor: text,
+    ),
+    cardTheme: CardThemeData(
+      color: card,
+      elevation: 0,
+      margin: EdgeInsets.zero,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(16),
+      ),
+    ),
+    appBarTheme: AppBarTheme(
+      backgroundColor: card,
+      foregroundColor: text,
+      elevation: 0,
+    ),
+    useMaterial3: true,
+  );
 }
 
 class MyHomePage extends StatefulWidget {
@@ -169,13 +218,15 @@ class _MyHomePageState extends State<MyHomePage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        backgroundColor: Theme.of(context).colorScheme.inversePrimary,
+        backgroundColor: Theme.of(context).colorScheme.primary,
+        foregroundColor: Theme.of(context).colorScheme.onPrimary,
         title: Text(widget.title),
       ),
       body: Column(
         children: [
           Expanded(
             child: ListView.builder(
+              padding: const EdgeInsets.all(16.0),
               controller: _scrollController,
               itemCount: _surfaceIds.length,
               itemBuilder: (context, index) {
@@ -189,24 +240,62 @@ class _MyHomePageState extends State<MyHomePage> {
           ),
           SafeArea(
             child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 16.0),
+              padding: const EdgeInsets.all(16.0),
               child: Row(
                 children: [
                   Expanded(
                     child: TextField(
                       controller: _textController,
-                      decoration: const InputDecoration(
-                        hintText: 'Enter a message',
+                      decoration: InputDecoration(
+                        hintText: 'Add note...',
+                        hintStyle: TextStyle(
+                          color: Theme.of(context).colorScheme.onSurfaceVariant,
+                        ),
+                        filled: true,
+                        fillColor: Theme.of(context).colorScheme.surface,
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(100),
+                          borderSide: BorderSide.none,
+                        ),
+                        contentPadding: const EdgeInsets.symmetric(
+                          horizontal: 20,
+                          vertical: 14,
+                        ),
+                        focusedBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(100),
+                          borderSide: BorderSide(
+                            color: Theme.of(context).colorScheme.primary,
+                            width: 2,
+                          ),
+                        ),
                       ),
                     ),
                   ),
-                  const SizedBox(width: 16),
+                  const SizedBox(width: 8),
                   ElevatedButton(
                     onPressed: () {
                       _sendMessage(_textController.text);
                       _textController.clear();
                     },
-                    child: const Text('Send'),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Theme.of(context).colorScheme.primary,
+                      foregroundColor: Theme.of(context).colorScheme.onPrimary,
+                      elevation: 0,
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 24,
+                        vertical: 14,
+                      ),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(100),
+                      ),
+                    ),
+                    child: const Text(
+                      'Send',
+                      style: TextStyle(
+                        fontWeight: FontWeight.w600,
+                        fontSize: 15,
+                      ),
+                    ),
                   ),
                 ],
               ),
@@ -266,39 +355,46 @@ class WorkoutCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     return Card(
-      elevation: 4,
-      margin: const EdgeInsets.symmetric(vertical: 16.0, horizontal: 16.0),
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          Padding(
-            padding: const EdgeInsets.all(16.0),
-            child: Text(
+      margin: const EdgeInsets.only(bottom: 16.0),
+      child: Padding(
+        padding: const EdgeInsets.all(16.0),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
               title,
-              style: theme.textTheme.headlineSmall?.copyWith(
+              style: theme.textTheme.titleLarge?.copyWith(
                 fontWeight: FontWeight.bold,
-                fontStyle: FontStyle.italic,
               ),
             ),
-          ),
-          const Divider(),
-          Padding(
-            padding: const EdgeInsets.all(16.0),
-            child: Wrap(
+            const SizedBox(height: 12),
+            Wrap(
               spacing: 8.0,
               runSpacing: 8.0,
               children: exercises
                   .map(
-                    (exercise) => Chip(
-                      avatar: const Icon(Icons.fitness_center),
-                      label: Text(exercise),
+                    (exercise) => Container(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 16,
+                        vertical: 8,
+                      ),
+                      decoration: BoxDecoration(
+                        color: theme.colorScheme.surfaceContainerHighest,
+                        borderRadius: BorderRadius.circular(100),
+                      ),
+                      child: Text(
+                        exercise,
+                        style: theme.textTheme.bodyMedium?.copyWith(
+                          fontWeight: FontWeight.w500,
+                          color: theme.colorScheme.onSurfaceVariant,
+                        ),
+                      ),
                     ),
                   )
                   .toList(),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }
@@ -419,59 +515,162 @@ class _RepsCardState extends State<RepsCard> {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final isCompleted = widget.completed;
+
     return Card(
-      elevation: 4,
-      margin: const EdgeInsets.symmetric(vertical: 16.0, horizontal: 16.0),
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          Padding(
-            padding: const EdgeInsets.all(16.0),
-            child: Text(
-              widget.exercise,
-              style: theme.textTheme.headlineSmall?.copyWith(
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-          ),
-          Padding(
-            padding: const EdgeInsets.all(16.0),
-            child: Text(
-              '${widget.numberOfReps}',
-              style: theme.textTheme.headlineSmall,
-            ),
-          ),
-          const Divider(),
-          Padding(
-            padding: const EdgeInsets.all(16.0),
-            child: Row(
-              spacing: 8,
+      margin: const EdgeInsets.only(bottom: 16.0),
+      child: Padding(
+        padding: const EdgeInsets.all(16.0),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            // Header
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                const Text('Reps completed:'),
-                Text('$repsCompleted'),
-                IconButton(
-                  icon: const Icon(Icons.arrow_upward),
-                  onPressed: widget.completed
-                      ? null
-                      : () => setState(() => repsCompleted++),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Row(
+                        children: [
+                          Flexible(
+                            child: Text(
+                              widget.exercise,
+                              style: theme.textTheme.titleLarge?.copyWith(
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                          ),
+                          const SizedBox(width: 8),
+                          Icon(
+                            Icons.autorenew,
+                            size: 20,
+                            color: theme.colorScheme.primary,
+                          ),
+                        ],
+                      ),
+                      Text(
+                        'Target: ${widget.numberOfReps}',
+                        style: theme.textTheme.bodyMedium?.copyWith(
+                          color: theme.colorScheme.onSurfaceVariant,
+                        ),
+                      ),
+                    ],
+                  ),
                 ),
-                IconButton(
-                  icon: const Icon(Icons.arrow_downward),
-                  onPressed: widget.completed
-                      ? null
-                      : () => setState(() => repsCompleted--),
-                ),
-                IconButton(
-                  icon: const Icon(Icons.check),
-                  onPressed: widget.completed
-                      ? null
-                      : () => widget.onCompleted(repsCompleted),
+                // Counter Controls
+                Row(
+                  children: [
+                    _buildControlButton(
+                      theme,
+                      Icons.remove,
+                      isCompleted
+                          ? null
+                          : () => setState(() => repsCompleted--),
+                    ),
+                    Container(
+                      width: 64,
+                      margin: const EdgeInsets.symmetric(horizontal: 8),
+                      padding: const EdgeInsets.symmetric(vertical: 8),
+                      decoration: BoxDecoration(
+                        color: theme.colorScheme.background,
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                      child: Column(
+                        children: [
+                          Text(
+                            '$repsCompleted',
+                            style: theme.textTheme.titleLarge?.copyWith(
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                          Text(
+                            'Reps',
+                            style: theme.textTheme.labelSmall?.copyWith(
+                              color: theme.colorScheme.onSurfaceVariant,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                    _buildControlButton(
+                      theme,
+                      Icons.add,
+                      isCompleted
+                          ? null
+                          : () => setState(() => repsCompleted++),
+                    ),
+                  ],
                 ),
               ],
             ),
+            const SizedBox(height: 16),
+            // Complete Button
+            SizedBox(
+              width: double.infinity,
+              child: ElevatedButton(
+                onPressed: isCompleted
+                    ? null
+                    : () => widget.onCompleted(repsCompleted),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: theme.colorScheme.primary,
+                  foregroundColor: theme.colorScheme.onPrimary,
+                  disabledBackgroundColor: theme.colorScheme.onSurface
+                      .withOpacity(0.12),
+                  disabledForegroundColor: theme.colorScheme.onSurface
+                      .withOpacity(0.38),
+                  padding: const EdgeInsets.symmetric(vertical: 16),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(100),
+                  ),
+                  elevation: 0,
+                ),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Text(
+                      'Complete',
+                      style: TextStyle(
+                        fontWeight: FontWeight.w600,
+                        fontSize: 16,
+                      ),
+                    ),
+                    if (isCompleted) ...[
+                      const SizedBox(width: 8),
+                      const Icon(Icons.check, size: 20),
+                    ],
+                  ],
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildControlButton(
+    ThemeData theme,
+    IconData icon,
+    VoidCallback? onPressed,
+  ) {
+    return Material(
+      color: theme.colorScheme.surfaceContainerHighest,
+      borderRadius: BorderRadius.circular(8),
+      child: InkWell(
+        onTap: onPressed,
+        borderRadius: BorderRadius.circular(8),
+        child: Container(
+          width: 32,
+          height: 32,
+          alignment: Alignment.center,
+          child: Icon(
+            icon,
+            size: 20,
+            color: theme.colorScheme.onSurfaceVariant,
           ),
-        ],
+        ),
       ),
     );
   }
