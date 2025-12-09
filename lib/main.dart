@@ -314,18 +314,9 @@ final repsCardSchema = S.object(
       description:
           'The number of reps to be done in order to complete this exercise',
     ),
-    'repsCompleted': S.integer(
-      description:
-          'The number of reps that were actually performed by the user.',
-    ),
     'completed': S.boolean(
       description:
           'Whether or not the exercise has been completed yet (initial value is false)',
-    ),
-    'completeAction': A2uiSchemas.action(
-      description:
-          'The action performed when the user has completed the exercise. I will '
-          'provide the number of reps completed by the users as "numberOfRepsCompleted".',
     ),
   },
   required: [
@@ -333,7 +324,6 @@ final repsCardSchema = S.object(
     'instructions',
     'numberOfReps',
     'completed',
-    'completeAction',
   ],
 );
 
@@ -346,33 +336,12 @@ final repsCard = CatalogItem(
     final instructions = json['instructions'] as String;
     final numberOfReps = json['numberOfReps'] as int;
     final completed = json['completed'] as bool;
-    final action = json['completeAction'] as JsonMap?;
 
     return RepsCard(
       exercise: exercise,
       instructions: instructions,
       numberOfReps: numberOfReps,
       completed: completed,
-      onCompleted: (reps) {
-        if (action == null) {
-          return;
-        }
-        final actionName = action['name'] as String;
-        final List<Object?> contextDefinition =
-            (action['context'] as List<Object?>?) ?? <Object>[];
-        final JsonMap resolvedContext = resolveContext(
-          itemContext.dataContext,
-          contextDefinition,
-        );
-        resolvedContext['numberOfRepsCompleted'] = reps;
-        itemContext.dispatchEvent(
-          UserActionEvent(
-            name: actionName,
-            sourceComponentId: itemContext.id,
-            context: resolvedContext,
-          ),
-        );
-      },
     );
   },
 );
@@ -382,7 +351,6 @@ class RepsCard extends StatefulWidget {
   final String instructions;
   final int numberOfReps;
   final bool completed;
-  final void Function(int) onCompleted;
 
   const RepsCard({
     super.key,
@@ -390,7 +358,6 @@ class RepsCard extends StatefulWidget {
     required this.instructions,
     required this.numberOfReps,
     required this.completed,
-    required this.onCompleted,
   });
 
   @override
@@ -440,35 +407,6 @@ class _RepsCardState extends State<RepsCard> {
             child: Text(
               '${widget.numberOfReps}',
               style: theme.textTheme.headlineSmall,
-            ),
-          ),
-          const Divider(),
-          Padding(
-            padding: const EdgeInsets.all(16.0),
-            child: Row(
-              spacing: 8,
-              children: [
-                const Text('Reps completed:'),
-                Text('$repsCompleted'),
-                IconButton(
-                  icon: const Icon(Icons.arrow_upward),
-                  onPressed: widget.completed
-                      ? null
-                      : () => setState(() => repsCompleted++),
-                ),
-                IconButton(
-                  icon: const Icon(Icons.arrow_downward),
-                  onPressed: widget.completed
-                      ? null
-                      : () => setState(() => repsCompleted--),
-                ),
-                IconButton(
-                  icon: const Icon(Icons.check),
-                  onPressed: widget.completed
-                      ? null
-                      : () => widget.onCompleted(repsCompleted),
-                ),
-              ],
             ),
           ),
         ],
