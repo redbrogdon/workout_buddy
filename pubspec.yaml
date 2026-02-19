@@ -9,18 +9,21 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
-  cupertino_icons: ^1.0.8
-  genui: ^0.5.1
-  genui_firebase_ai: ^0.5.1
-  firebase_core: ^4.2.1
-  shared_preferences: ^2.5.3
+  shared_preferences: ^2.5.4
   json_schema_builder: ^0.1.3
-  firebase_ai: ^3.6.0
+  firebase_core: ^4.4.0
+  firebase_ai: ^3.8.0
+  cupertino_icons: ^1.0.8
+  genui:
+    git:
+      url: git@github.com:flutter/genui.git
+      ref: e22c9865107004df29fd33e987cec7e99d1cefa4
+      path: packages/genui
 
 dev_dependencies:
   flutter_test:
     sdk: flutter
-  flutter_lints: ^4.0.0
+  flutter_lints: ^6.0.0
 
 flutter:
   uses-material-design: true

@@ -6,13 +6,12 @@ import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_ai/firebase_ai.dart';
 import 'package:flutter/material.dart';
 import 'package:genui/genui.dart';
-import 'package:genui_firebase_ai/genui_firebase_ai.dart';
 import 'package:json_schema_builder/json_schema_builder.dart';
 
 import 'firebase_options.dart';
 
 void main() async {
-  configureGenUiLogging(
+  configureLogging(
     logCallback: (level, msg) => debugPrint('GenUI $level: $msg'),
   );
 
@@ -20,6 +19,10 @@ void main() async {
   await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
   runApp(const MyApp());
 }
+
+final model = FirebaseAI.googleAI().generativeModel(
+  model: 'gemini-3.1-pro-preview',
+);
 
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
@@ -46,13 +49,18 @@ class MyHomePage extends StatefulWidget {
 }
 
 class _MyHomePageState extends State<MyHomePage> {
-  final _textController = TextEditingController();
-  final _scrollController = ScrollController();
-  late final GenUiConversation conversation;
+  final _chatSession = model.startChat();
+
+  late final SurfaceController _controller;
+  late final A2uiTransportAdapter _transport;
+  late final Conversation _conversation;
   final _surfaceIds = <String>[];
 
-  void _onSurfaceAdded(SurfaceAdded update) {
-    setState(() => _surfaceIds.add(update.surfaceId));
+  final _textController = TextEditingController();
+  final _scrollController = ScrollController();
+
+  void _onSurfaceAdded(String id) {
+    setState(() => _surfaceIds.add(id));
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (_scrollController.hasClients) {
         _scrollController.animateTo(
@@ -64,9 +72,9 @@ class _MyHomePageState extends State<MyHomePage> {
     });
   }
 
-  void _onSurfaceDeleted(SurfaceRemoved update) {
+  void _onSurfaceDeleted(String id) {
     setState(
-      () => _surfaceIds.remove(update.surfaceId),
+      () => _surfaceIds.remove(id),
     );
   }
 
@@ -75,10 +83,25 @@ class _MyHomePageState extends State<MyHomePage> {
     ScaffoldMessenger.of(context).showSnackBar(snackBar);
   }
 
-  Future<void> _sendMessage(String text) async {
-    final msg = text.trim();
-    if (msg.isNotEmpty) {
-      return conversation.sendRequest(UserMessage.text(text));
+  void _onError(String text) {
+    final snackBar = SnackBar(
+      content: Text('ERROR: $text'),
+      backgroundColor: Colors.red,
+    );
+    ScaffoldMessenger.of(context).showSnackBar(snackBar);
+  }
+
+  Future<void> _sendAndReceive(ChatMessage msg) async {
+    if (msg.text.trim().isEmpty) return;
+    debugPrint('--------- MESSAGE FROM ME ----------');
+    debugPrint(msg.text);
+    debugPrint('------------------------------------');
+    final response = await _chatSession.sendMessage(Content.text(msg.text));
+    debugPrint('--------- RESPONSE FROM AGENT ----------');
+    debugPrint(response.text ?? '[NULL]');
+    debugPrint('----------------------------------------');
+    if (response.text?.isNotEmpty ?? false) {
+      _transport.addChunk(response.text!);
     }
   }
 
@@ -86,83 +109,49 @@ class _MyHomePageState extends State<MyHomePage> {
   void dispose() {
     _textController.dispose();
     _scrollController.dispose();
+    _transport.dispose();
+    _controller.dispose();
     super.dispose();
   }
 
   @override
   void initState() {
     super.initState();
-    final catalog = CoreCatalogItems.asCatalog().copyWith([
+
+    final catalog = BasicCatalogItems.asCatalog().copyWith([
       workoutCard,
       repsCard,
     ]);
-    final generator = FirebaseAiContentGenerator(
-      modelCreator:
-          ({
-            required FirebaseAiContentGenerator configuration,
-            Content? systemInstruction,
-            List<Tool>? tools,
-            ToolConfig? toolConfig,
-          }) {
-            return GeminiGenerativeModel(
-              FirebaseAI.googleAI().generativeModel(
-                model: 'gemini-2.5-pro',
-                systemInstruction: systemInstruction,
-                tools: tools,
-                toolConfig: toolConfig,
-              ),
-            );
-          },
+
+    _controller = SurfaceController(catalogs: [catalog]);
+
+    _transport = A2uiTransportAdapter(onSend: _sendAndReceive);
+
+    _conversation = Conversation(
+      controller: _controller,
+      transport: _transport,
+    );
+
+    _conversation.events.listen((event) {
+      switch (event) {
+        case ConversationSurfaceAdded added:
+          _onSurfaceAdded(added.surfaceId);
+        case ConversationSurfaceRemoved removed:
+          _onSurfaceDeleted(removed.surfaceId);
+        case ConversationContentReceived content:
+          _onTextAdded(content.text);
+        case ConversationError error:
+          _onError(error.error.toString());
+        default:
+      }
+    });
+
+    final promptBuilder = PromptBuilder.chat(
       catalog: catalog,
-      systemInstruction: '''
-          You are an expert in creating workout plans and leading the user
-          through performing the exercises. No cardio, free weights, or other
-          sports. Each workout plan should be 3 to 5 different exercises, each
-          with a number of sets and repetitions.
-
-          The workout plans you create should meet these criteria:
-          * Composed of three to five individual exercises.
-          * Only includes bodyweight exercises, things that can be done without
-            equipment while alone in a small room.
-          * Should only include exercises measured in reps, rather than time
-            (push-ups are fine, but timed planks should not be included).
-          * Each exercise must be a single set of reps.
-
-          This is the process you should follow:
-
-          1. Generate a WorkoutCard that displays a proposed workout plan, and
-             then wait for a response from me. If I ask for changes, update
-             that workout plan and then update the WorkoutPlan to reflect
-             those changes.
-
-          2. **Stop and wait for a confirmation from me. Do not proceed until I
-             indicate the workout plan is acceptable.**
-
-          3. Once I accept the workout plan, you will lead me through each of the
-             exercises in the plan, one at a time, beginning with the first. Include
-             **only the exercises in the plan I agreed to**. To
-             do so, follow these steps for each exercise, one at a time:
-             - Generate a RepsCard for the exercise and display it in a new surface.
-               **Use a new RepsCard for each exercise.**
-             - **Stop and wait for a confirmation from me. Do not proceed until you
-               receive a completeAction event, which will indicate I've completed the
-               exercise.**
-             - Mark the exercise as completed, updating the relevant UI surface.
-             - Congratulate me for completing the exercise, and include the number of
-               repos completed in your message.
-             - Restart Step 3 with the next uncompleted exercise, if one exists.
-          
-          4. When all the exercises have been completed, congratulate me on being
-             finished.
-''',
+      instructions: systemInstruction,
     );
-    conversation = GenUiConversation(
-      genUiManager: GenUiManager(catalog: catalog),
-      contentGenerator: generator,
-      onSurfaceAdded: _onSurfaceAdded,
-      onSurfaceDeleted: _onSurfaceDeleted,
-      onTextResponse: _onTextAdded,
-    );
+
+    _conversation.sendRequest(ChatMessage.system(promptBuilder.systemPrompt));
   }
 
   @override
@@ -174,15 +163,23 @@ class _MyHomePageState extends State<MyHomePage> {
       ),
       body: Column(
         children: [
+          ValueListenableBuilder<ConversationState>(
+            valueListenable: _conversation.state,
+            builder: (context, state, child) {
+              if (state.isWaiting) {
+                return const LinearProgressIndicator();
+              }
+              return const SizedBox.shrink();
+            },
+          ),
           Expanded(
             child: ListView.builder(
               controller: _scrollController,
               itemCount: _surfaceIds.length,
               itemBuilder: (context, index) {
                 final id = _surfaceIds[index];
-                return GenUiSurface(
-                  host: conversation.host,
-                  surfaceId: id,
+                return Surface(
+                  surfaceContext: _controller.contextFor(id),
                 );
               },
             ),
@@ -203,8 +200,12 @@ class _MyHomePageState extends State<MyHomePage> {
                   const SizedBox(width: 16),
                   ElevatedButton(
                     onPressed: () {
-                      _sendMessage(_textController.text);
-                      _textController.clear();
+                      if (_textController.text.isNotEmpty) {
+                        _conversation.sendRequest(
+                          ChatMessage.user(_textController.text),
+                        );
+                        _textController.clear();
+                      }
                     },
                     child: const Text('Send'),
                   ),
@@ -357,9 +358,10 @@ final repsCard = CatalogItem(
         if (action == null) {
           return;
         }
-        final actionName = action['name'] as String;
-        final List<Object?> contextDefinition =
-            (action['context'] as List<Object?>?) ?? <Object>[];
+        final actionEvent = action['event'] as JsonMap?;
+        final eventName = (actionEvent?['name'] as String?) ?? '';
+        final JsonMap contextDefinition =
+            (action['context'] as JsonMap?) ?? <String, Object?>{};
         final JsonMap resolvedContext = resolveContext(
           itemContext.dataContext,
           contextDefinition,
@@ -367,7 +369,7 @@ final repsCard = CatalogItem(
         resolvedContext['numberOfRepsCompleted'] = reps;
         itemContext.dispatchEvent(
           UserActionEvent(
-            name: actionName,
+            name: eventName,
             sourceComponentId: itemContext.id,
             context: resolvedContext,
           ),
@@ -476,3 +478,45 @@ class _RepsCardState extends State<RepsCard> {
     );
   }
 }
+
+const systemInstruction = '''
+          You are an expert in creating workout plans and leading the user
+          through performing the exercises. No cardio, free weights, or other
+          sports. Each workout plan should be 3 to 5 different exercises, each
+          with a number of sets and repetitions.
+
+          The workout plans you create should meet these criteria:
+          * Composed of three to five individual exercises.
+          * Only includes bodyweight exercises, things that can be done without
+            equipment while alone in a small room.
+          * Should only include exercises measured in reps, rather than time
+            (push-ups are fine, but timed planks should not be included).
+          * Each exercise must be a single set of reps.
+
+          This is the process you should follow:
+
+          1. Generate a WorkoutCard that displays a proposed workout plan, and
+             then wait for a response from me. If I ask for changes, update
+             that workout plan and then update the WorkoutPlan to reflect
+             those changes.
+
+          2. **Stop and wait for a confirmation from me. Do not proceed until I
+             indicate the workout plan is acceptable.**
+
+          3. Once I accept the workout plan, you will lead me through each of the
+             exercises in the plan, one at a time, beginning with the first. Include
+             **only the exercises in the plan I agreed to**. To
+             do so, follow these steps for each exercise, one at a time:
+             - Generate a RepsCard for the exercise and display it in a new surface.
+               **Use a new RepsCard for each exercise.**
+             - **Stop and wait for a confirmation from me. Do not proceed until you
+               receive a completeAction event, which will indicate I've completed the
+               exercise.**
+             - Mark the exercise as completed, updating the relevant UI surface.
+             - Congratulate me for completing the exercise, and include the number of
+               repos completed in your message.
+             - Restart Step 3 with the next uncompleted exercise, if one exists.
+          
+          4. When all the exercises have been completed, congratulate me on being
+             finished.
+''';
