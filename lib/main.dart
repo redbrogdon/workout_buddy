@@ -221,6 +221,7 @@ class _MyHomePageState extends State<MyHomePage> {
 
 final workoutCardSchema = S.object(
   properties: {
+    'component': S.string(enumValues: ['WorkoutCard']),
     'title': S.string(description: 'The title of the workout'),
     'exercises': S.list(
       description: 'A list of 3-5 exercises to perform as part of the workout',
@@ -307,6 +308,7 @@ class WorkoutCard extends StatelessWidget {
 
 final repsCardSchema = S.object(
   properties: {
+    'component': S.string(enumValues: ['RepsCard']),
     'exercise': S.string(description: 'The name of the workout'),
     'instructions': S.string(
       description: 'A brief description of how one should perform the exercise',
