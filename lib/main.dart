@@ -79,8 +79,11 @@ class _MyHomePageState extends State<MyHomePage> {
   }
 
   void _onTextAdded(String text) {
-    final snackBar = SnackBar(content: Text(text));
-    ScaffoldMessenger.of(context).showSnackBar(snackBar);
+    final trimmed = text.trim();
+    if (trimmed.isNotEmpty) {
+      final snackBar = SnackBar(content: Text(trimmed));
+      ScaffoldMessenger.of(context).showSnackBar(snackBar);
+    }
   }
 
   void _onError(String text) {
@@ -118,10 +121,12 @@ class _MyHomePageState extends State<MyHomePage> {
   void initState() {
     super.initState();
 
-    final catalog = BasicCatalogItems.asCatalog().copyWith([
-      workoutCard,
-      repsCard,
-    ]);
+    final catalog = BasicCatalogItems.asCatalog().copyWith(
+      newItems: [
+        workoutCard,
+        repsCard,
+      ],
+    );
 
     _controller = SurfaceController(catalogs: [catalog]);
 
@@ -356,22 +361,22 @@ final repsCard = CatalogItem(
       instructions: instructions,
       numberOfReps: numberOfReps,
       completed: completed,
-      onCompleted: (reps) {
+      onCompleted: (reps) async {
         if (action == null) {
           return;
         }
-        final actionEvent = action['event'] as JsonMap?;
-        final eventName = (actionEvent?['name'] as String?) ?? '';
+        final event = action['event'] as JsonMap?;
+        final name = (event?['name'] as String?) ?? '';
         final JsonMap contextDefinition =
-            (action['context'] as JsonMap?) ?? <String, Object?>{};
-        final JsonMap resolvedContext = resolveContext(
+            (event?['context'] as JsonMap?) ?? <String, Object?>{};
+        final JsonMap resolvedContext = await resolveContext(
           itemContext.dataContext,
           contextDefinition,
         );
         resolvedContext['numberOfRepsCompleted'] = reps;
         itemContext.dispatchEvent(
           UserActionEvent(
-            name: eventName,
+            name: name,
             sourceComponentId: itemContext.id,
             context: resolvedContext,
           ),
@@ -521,4 +526,7 @@ const systemInstruction = '''
           
           4. When all the exercises have been completed, congratulate me on being
              finished.
+
+          Some other, important instructions:
+          * Prefer to reuse existing WorkoutCard surfaces rather than creating new ones.
 ''';
