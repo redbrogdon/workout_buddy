@@ -242,32 +242,39 @@ final workoutCardSchema = S.object(
   required: ['title', 'exercises'],
 );
 
+class _WorkoutCardData {
+  final String title;
+  final List<String> exercises;
+
+  _WorkoutCardData({required this.title, required this.exercises});
+
+  factory _WorkoutCardData.fromJson(Map<String, Object?> json) {
+    if (json case {
+      'title': String title,
+      'exercises': List<String> exercises,
+    }) {
+      return _WorkoutCardData(title: title, exercises: exercises);
+    }
+
+    throw Exception('Invalid JSON for _WorkoutCardData');
+  }
+}
+
 final workoutCard = CatalogItem(
   name: 'WorkoutCard',
   dataSchema: workoutCardSchema,
   widgetBuilder: (itemContext) {
     final json = itemContext.data as Map<String, Object?>;
-    final title = json['title'] as String;
-    final exercises = (json['exercises'] as List<dynamic>)
-        .map((s) => s.toString())
-        .toList();
+    final data = _WorkoutCardData.fromJson(json);
 
-    return WorkoutCard(
-      title: title,
-      exercises: exercises,
-    );
+    return _WorkoutCard(data: data);
   },
 );
 
-class WorkoutCard extends StatelessWidget {
-  final String title;
-  final List<String> exercises;
+class _WorkoutCard extends StatelessWidget {
+  final _WorkoutCardData data;
 
-  const WorkoutCard({
-    super.key,
-    required this.title,
-    required this.exercises,
-  });
+  const _WorkoutCard({required this.data});
 
   @override
   Widget build(BuildContext context) {
@@ -282,7 +289,7 @@ class WorkoutCard extends StatelessWidget {
           Padding(
             padding: const EdgeInsets.all(16.0),
             child: Text(
-              title,
+              data.title,
               style: theme.textTheme.headlineSmall?.copyWith(
                 fontWeight: FontWeight.bold,
                 fontStyle: FontStyle.italic,
@@ -295,7 +302,7 @@ class WorkoutCard extends StatelessWidget {
             child: Wrap(
               spacing: 8.0,
               runSpacing: 8.0,
-              children: exercises
+              children: data.exercises
                   .map(
                     (exercise) => Chip(
                       avatar: const Icon(Icons.fitness_center),
@@ -326,42 +333,77 @@ final repsCardSchema = S.object(
       description:
           'The number of reps that were actually performed by the user.',
     ),
-    'completed': S.boolean(
+    'isCompleted': S.boolean(
       description:
-          'Whether or not the exercise has been completed yet (initial value is false)',
+          'Whether or not the exercise has been completed yet (initial value '
+          'is false)',
     ),
     'completeAction': A2uiSchemas.action(
       description:
-          'The action performed when the user has completed the exercise. I will '
-          'provide the number of reps completed by the users as "numberOfRepsCompleted".',
+          'The action performed when the user has completed the exercise. '
+          'I will provide the number of reps completed by the users as '
+          '"numberOfRepsCompleted".',
     ),
   },
   required: [
     'exercise',
     'instructions',
     'numberOfReps',
-    'completed',
+    'isCompleted',
     'completeAction',
   ],
 );
+
+class _RepsCardData {
+  final String exercise;
+  final String instructions;
+  final int numberOfReps;
+  final int? repsCompleted;
+  final bool isCompleted;
+  final JsonMap? completeAction;
+
+  _RepsCardData({
+    required this.exercise,
+    required this.instructions,
+    required this.numberOfReps,
+    this.repsCompleted,
+    required this.isCompleted,
+    this.completeAction,
+  });
+
+  factory _RepsCardData.fromJson(Map<String, Object?> json) {
+    if (json case {
+      'exercise': String exercise,
+      'instructions': String instructions,
+      'numberOfReps': int numberOfReps,
+      'repsCompleted': int? repsCompleted,
+      'isCompleted': bool isCompleted,
+    }) {
+      return _RepsCardData(
+        exercise: exercise,
+        instructions: instructions,
+        numberOfReps: numberOfReps,
+        repsCompleted: repsCompleted,
+        isCompleted: isCompleted,
+        completeAction: json['completeAction'] as JsonMap?,
+      );
+    }
+
+    throw Exception('Invalid JSON for _RepsCardData');
+  }
+}
 
 final repsCard = CatalogItem(
   name: 'RepsCard',
   dataSchema: repsCardSchema,
   widgetBuilder: (itemContext) {
     final json = itemContext.data as Map<String, Object?>;
-    final exercise = json['exercise'] as String;
-    final instructions = json['instructions'] as String;
-    final numberOfReps = json['numberOfReps'] as int;
-    final completed = json['completed'] as bool;
-    final action = json['completeAction'] as JsonMap?;
+    final data = _RepsCardData.fromJson(json);
 
-    return RepsCard(
-      exercise: exercise,
-      instructions: instructions,
-      numberOfReps: numberOfReps,
-      completed: completed,
+    return _RepsCard(
+      data: data,
       onCompleted: (reps) async {
+        final action = data.completeAction;
         if (action == null) {
           return;
         }
@@ -386,42 +428,34 @@ final repsCard = CatalogItem(
   },
 );
 
-class RepsCard extends StatefulWidget {
-  final String exercise;
-  final String instructions;
-  final int numberOfReps;
-  final bool completed;
+class _RepsCard extends StatefulWidget {
+  final _RepsCardData data;
   final void Function(int) onCompleted;
 
-  const RepsCard({
-    super.key,
-    required this.exercise,
-    required this.instructions,
-    required this.numberOfReps,
-    required this.completed,
+  const _RepsCard({
+    required this.data,
     required this.onCompleted,
   });
 
   @override
-  State<RepsCard> createState() => _RepsCardState();
+  State<_RepsCard> createState() => _RepsCardState();
 }
 
-class _RepsCardState extends State<RepsCard> {
+class _RepsCardState extends State<_RepsCard> {
   late int repsCompleted;
 
   @override
   void initState() {
     super.initState();
-    repsCompleted = widget.numberOfReps;
+    repsCompleted = widget.data.numberOfReps;
   }
 
   @override
-  void didUpdateWidget(RepsCard oldWidget) {
+  void didUpdateWidget(_RepsCard oldWidget) {
     super.didUpdateWidget(oldWidget);
 
-    if (oldWidget.exercise != widget.exercise) {
-      // We're reusing the widget with a new exercise, so reset the count.
-      repsCompleted = widget.numberOfReps;
+    if (oldWidget.data.exercise != widget.data.exercise) {
+      repsCompleted = widget.data.numberOfReps;
     }
   }
 
@@ -438,7 +472,7 @@ class _RepsCardState extends State<RepsCard> {
           Padding(
             padding: const EdgeInsets.all(16.0),
             child: Text(
-              widget.exercise,
+              widget.data.exercise,
               style: theme.textTheme.headlineSmall?.copyWith(
                 fontWeight: FontWeight.bold,
               ),
@@ -447,7 +481,7 @@ class _RepsCardState extends State<RepsCard> {
           Padding(
             padding: const EdgeInsets.all(16.0),
             child: Text(
-              '${widget.numberOfReps}',
+              '${widget.data.numberOfReps}',
               style: theme.textTheme.headlineSmall,
             ),
           ),
@@ -461,19 +495,19 @@ class _RepsCardState extends State<RepsCard> {
                 Text('$repsCompleted'),
                 IconButton(
                   icon: const Icon(Icons.arrow_upward),
-                  onPressed: widget.completed
+                  onPressed: widget.data.isCompleted
                       ? null
                       : () => setState(() => repsCompleted++),
                 ),
                 IconButton(
                   icon: const Icon(Icons.arrow_downward),
-                  onPressed: widget.completed
+                  onPressed: widget.data.isCompleted
                       ? null
                       : () => setState(() => repsCompleted--),
                 ),
                 IconButton(
                   icon: const Icon(Icons.check),
-                  onPressed: widget.completed
+                  onPressed: widget.data.isCompleted
                       ? null
                       : () => widget.onCompleted(repsCompleted),
                 ),
@@ -485,6 +519,43 @@ class _RepsCardState extends State<RepsCard> {
     );
   }
 }
+
+final timerCardSchema = S.object(
+  properties: {
+    'component': S.string(enumValues: ['TimerCard']),
+    'exercise': S.string(description: 'The name of the workout'),
+    'instructions': S.string(
+      description: 'A brief description of how one should perform the exercise',
+    ),
+    'suggestedDuration': S.integer(
+      description: 'The suggested duration, in seconds, for this exercise',
+    ),
+    'actualDuration': S.integer(
+      description:
+          'The duration, in seconds, for which this exercise was performed '
+          'by the user',
+    ),
+    'isCompleted': S.boolean(
+      description:
+          'Whether or not the exercise has been completed yet (initial value '
+          'is false)',
+    ),
+    'completeAction': A2uiSchemas.action(
+      description:
+          'The action performed when the user has completed the exercise. '
+          'I will provide the duration the user performed the exercise as '
+          '"actualDuration".',
+    ),
+  },
+  required: [
+    'exercise',
+    'instructions',
+    'suggestedDuration',
+    'actualDuration',
+    'isCompleted',
+    'completeAction',
+  ],
+);
 
 const systemInstruction = '''
           You are an expert in creating workout plans and leading the user
@@ -502,31 +573,35 @@ const systemInstruction = '''
 
           This is the process you should follow:
 
-          1. Generate a WorkoutCard that displays a proposed workout plan, and
-             then wait for a response from me. If I ask for changes, update
-             that workout plan and then update the WorkoutPlan to reflect
-             those changes.
+          1. Generate a WorkoutCard that displays a proposed workout
+             plan, and then wait for a response from me. If I ask for
+             changes, update that workout plan and then update the
+             WorkoutPlan to reflect those changes.
 
-          2. **Stop and wait for a confirmation from me. Do not proceed until I
-             indicate the workout plan is acceptable.**
+          2. **Stop and wait for a confirmation from me. Do not proceed
+             until I indicate the workout plan is acceptable.**
 
-          3. Once I accept the workout plan, you will lead me through each of the
-             exercises in the plan, one at a time, beginning with the first. Include
-             **only the exercises in the plan I agreed to**. To
-             do so, follow these steps for each exercise, one at a time:
-             - Generate a RepsCard for the exercise and display it in a new surface.
-               **Use a new RepsCard for each exercise.**
-             - **Stop and wait for a confirmation from me. Do not proceed until you
-               receive a completeAction event, which will indicate I've completed the
-               exercise.**
-             - Mark the exercise as completed, updating the relevant UI surface.
-             - Congratulate me for completing the exercise, and include the number of
-               repos completed in your message.
-             - Restart Step 3 with the next uncompleted exercise, if one exists.
+          3. Once I accept the workout plan, you will lead me through each
+             of the exercises in the plan, one at a time, beginning with
+             the first. Include **only the exercises in the plan I agreed
+             to**. To do so, follow these steps for each exercise, one at
+             a time:
+             - Generate a RepsCard for the exercise and display it in a
+               new surface. **Use a new RepsCard for each exercise.**
+             - **Stop and wait for a confirmation from me. Do not proceed
+               until you receive a completeAction event, which will
+               indicate I've completed the exercise.**
+             - Mark the exercise as completed, updating the relevant UI
+               surface.
+             - Congratulate me for completing the exercise, and include
+               the number of reps completed in your message.
+             - Restart Step 3 with the next uncompleted exercise, if one
+               exists.
           
-          4. When all the exercises have been completed, congratulate me on being
-             finished.
+          4. When all the exercises have been completed, congratulate me
+             on being finished.
 
           Some other, important instructions:
-          * Prefer to reuse existing WorkoutCard surfaces rather than creating new ones.
+          * If I ask for a change to the workout plan, update the existing
+            WorkoutCard surface rather than creating a new one.
 ''';
