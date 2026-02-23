@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:genui/genui.dart';
 import 'package:json_schema_builder/json_schema_builder.dart';
@@ -43,7 +44,7 @@ class _TimerCardData {
   final String exercise;
   final String instructions;
   final int suggestedDuration;
-  final int? actualDuration;
+  final int actualDuration;
   final bool isCompleted;
   final JsonMap? completeAction;
 
@@ -51,7 +52,7 @@ class _TimerCardData {
     required this.exercise,
     required this.instructions,
     required this.suggestedDuration,
-    this.actualDuration,
+    required this.actualDuration,
     required this.isCompleted,
     this.completeAction,
   });
@@ -62,7 +63,7 @@ class _TimerCardData {
         exercise: json['exercise'] as String,
         instructions: json['instructions'] as String,
         suggestedDuration: json['suggestedDuration'] as int,
-        actualDuration: json['actualDuration'] as int?,
+        actualDuration: json['actualDuration'] as int,
         isCompleted: json['isCompleted'] as bool,
         completeAction: json['completeAction'] as JsonMap?,
       );
@@ -81,7 +82,7 @@ final timerCard = CatalogItem(
 
     return _TimerCard(
       data: data,
-      onCompleted: (duration) async {
+      onCompleted: (actualDuration) async {
         final action = data.completeAction;
         if (action == null) {
           return;
@@ -94,7 +95,7 @@ final timerCard = CatalogItem(
           itemContext.dataContext,
           contextDefinition,
         );
-        resolvedContext['actualDuration'] = duration;
+        resolvedContext['actualDuration'] = actualDuration;
         itemContext.dispatchEvent(
           UserActionEvent(
             name: name,
@@ -122,11 +123,18 @@ class _TimerCard extends StatefulWidget {
 
 class _TimerCardState extends State<_TimerCard> {
   late int actualDuration;
+  Timer? _timer;
 
   @override
   void initState() {
     super.initState();
-    actualDuration = widget.data.suggestedDuration;
+    actualDuration = widget.data.actualDuration;
+  }
+
+  @override
+  void dispose() {
+    _timer?.cancel();
+    super.dispose();
   }
 
   @override
@@ -134,8 +142,29 @@ class _TimerCardState extends State<_TimerCard> {
     super.didUpdateWidget(oldWidget);
 
     if (oldWidget.data.exercise != widget.data.exercise) {
-      actualDuration = widget.data.suggestedDuration;
+      _timer?.cancel();
+      actualDuration = widget.data.actualDuration;
     }
+  }
+
+  void _toggleTimer() {
+    if (_timer?.isActive ?? false) {
+      _timer?.cancel();
+    } else {
+      _timer = Timer.periodic(const Duration(seconds: 1), (timer) {
+        setState(() {
+          actualDuration++;
+        });
+      });
+    }
+    setState(() {});
+  }
+
+  void _resetTimer() {
+    _timer?.cancel();
+    setState(() {
+      actualDuration = 0;
+    });
   }
 
   @override
@@ -158,9 +187,16 @@ class _TimerCardState extends State<_TimerCard> {
             ),
           ),
           Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 16.0),
+            child: Text(
+              widget.data.instructions,
+              style: theme.textTheme.bodyMedium,
+            ),
+          ),
+          Padding(
             padding: const EdgeInsets.all(16.0),
             child: Text(
-              'Suggested: ${widget.data.suggestedDuration}s',
+              'Suggested Duration: ${widget.data.suggestedDuration}s',
               style: theme.textTheme.titleMedium,
             ),
           ),
@@ -170,25 +206,28 @@ class _TimerCardState extends State<_TimerCard> {
             child: Row(
               spacing: 8,
               children: [
-                const Text('Duration (s):'),
-                Text('$actualDuration'),
+                const Text('Actual Duration:'),
+                Text('${actualDuration}s'),
                 IconButton(
-                  icon: const Icon(Icons.arrow_upward),
-                  onPressed: widget.data.isCompleted
-                      ? null
-                      : () => setState(() => actualDuration++),
+                  icon: Icon(
+                    (_timer?.isActive ?? false)
+                        ? Icons.pause
+                        : Icons.play_arrow,
+                  ),
+                  onPressed: widget.data.isCompleted ? null : _toggleTimer,
                 ),
                 IconButton(
-                  icon: const Icon(Icons.arrow_downward),
-                  onPressed: widget.data.isCompleted
-                      ? null
-                      : () => setState(() => actualDuration--),
+                  icon: const Icon(Icons.refresh),
+                  onPressed: widget.data.isCompleted ? null : _resetTimer,
                 ),
                 IconButton(
                   icon: const Icon(Icons.check),
                   onPressed: widget.data.isCompleted
                       ? null
-                      : () => widget.onCompleted(actualDuration),
+                      : () {
+                          _timer?.cancel();
+                          widget.onCompleted(actualDuration);
+                        },
                 ),
               ],
             ),
