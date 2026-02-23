@@ -1,6 +1,6 @@
 ---
 name: create-catalog-item
-description: Use this skill when the user asks to create a new CatalogItem, data class, and widget class based on a JSON Schema definition in an application that uses Flutter's `genui` package.
+description: Use this skill when the user asks to create a new CatalogItem, data class, and/or widget class based on a JSON Schema definition in an application that uses Flutter's `genui` package.
 ---
 
 # Create CatalogItem
@@ -15,9 +15,9 @@ When tasked with creating a CatalogItem from a `Schema`, follow these steps:
    - Name it `_<SchemaName>Data` (e.g., if schema is `myCardSchema`, data class is `_MyCardData`).
    - Add final fields for each property defined in the schema.
    - Create a `factory _<SchemaName>Data.fromJson(Map<String, Object?> json)` method.
-   - Use Dart 3 pattern matching `if (json case { ... })` to parse the required properties and return a new instance.
-   - For complex nested objects (e.g., an action field defined as `A2uiSchemas.action()`), extract them from the json map directly, for example: `json['completeAction'] as JsonMap?`.
-   - Throw an `Exception('Invalid JSON for _<SchemaName>Data')` if the pattern does not match the JSON.
+   - Use a `try-catch` block to parse the properties and return a new instance.
+   - Cast each property from the `json` map to its expected type, e.g., `title: json['title'] as String,` or `action: json['action'] as JsonMap?,`.
+   - Throw an `Exception('Invalid JSON for _<SchemaName>Data')` in the `catch` block if an error occurs.
 
 2. **Create the CatalogItem Top-Level Function**:
    - Name it identical to the schema name but without the "Schema" suffix (e.g., `myCard` for `myCardSchema`).
@@ -59,15 +59,14 @@ class _BasicCardData {
   _BasicCardData({required this.title, this.action});
 
   factory _BasicCardData.fromJson(Map<String, Object?> json) {
-    if (json case {
-      'title': String title,
-    }) {
+    try {
       return _BasicCardData(
-        title: title,
+        title: json['title'] as String,
         action: json['action'] as JsonMap?,
       );
+    } catch (_) {
+      throw Exception('Invalid JSON for _BasicCardData');
     }
-    throw Exception('Invalid JSON for _BasicCardData');
   }
 }
 
@@ -122,5 +121,5 @@ class _BasicCard extends StatelessWidget {
 ```
 
 ## Constraints
-- Ensure proper use of Dart 3 pattern matching in `fromJson`.
+- Ensure proper use of `try-catch` blocks and type casting when parsing JSON in `fromJson`.
 - Make sure action resolution accurately fetches variables via `resolveContext` and uses `itemContext.dispatchEvent` when actions are present in the Schema.
