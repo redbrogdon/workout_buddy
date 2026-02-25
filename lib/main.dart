@@ -5,7 +5,8 @@
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_ai/firebase_ai.dart';
 import 'package:flutter/material.dart';
-import 'package:genui/genui.dart';
+import 'package:genui/genui.dart' hide TextPart;
+import 'package:genui/genui.dart' as genui;
 
 import 'catalog/reps_card.dart';
 import 'catalog/timer_card.dart';
@@ -23,7 +24,7 @@ void main() async {
 }
 
 final model = FirebaseAI.googleAI().generativeModel(
-  model: 'gemini-3.1-pro-preview',
+  model: 'gemini-3-flash-preview',
 );
 
 class MyApp extends StatelessWidget {
@@ -96,15 +97,42 @@ class _MyHomePageState extends State<MyHomePage> {
     ScaffoldMessenger.of(context).showSnackBar(snackBar);
   }
 
+  void _sendMessage() {
+    if (_textController.text.isNotEmpty) {
+      _conversation.sendRequest(
+        ChatMessage.user(_textController.text),
+      );
+      _textController.clear();
+    }
+  }
+
   Future<void> _sendAndReceive(ChatMessage msg) async {
-    if (msg.text.trim().isEmpty) return;
+    final buffer = StringBuffer();
+
+    for (final part in msg.parts) {
+      if (part.isUiInteractionPart) {
+        buffer.write(part.asUiInteractionPart!.interaction);
+      } else if (part is genui.TextPart) {
+        buffer.write(part.text);
+      }
+    }
+
+    if (buffer.isEmpty) {
+      return;
+    }
+
+    final text = buffer.toString();
+
     debugPrint('--------- MESSAGE FROM ME ----------');
-    debugPrint(msg.text);
+    debugPrint(text);
     debugPrint('------------------------------------');
-    final response = await _chatSession.sendMessage(Content.text(msg.text));
+
+    final response = await _chatSession.sendMessage(Content.text(text));
+
     debugPrint('--------- RESPONSE FROM AGENT ----------');
     debugPrint(response.text ?? '[NULL]');
     debugPrint('----------------------------------------');
+
     if (response.text?.isNotEmpty ?? false) {
       _transport.addChunk(response.text!);
     }
@@ -200,6 +228,7 @@ class _MyHomePageState extends State<MyHomePage> {
                   Expanded(
                     child: TextField(
                       controller: _textController,
+                      onSubmitted: (_) => _sendMessage(),
                       decoration: const InputDecoration(
                         hintText: 'Enter a message',
                       ),
@@ -207,14 +236,7 @@ class _MyHomePageState extends State<MyHomePage> {
                   ),
                   const SizedBox(width: 16),
                   ElevatedButton(
-                    onPressed: () {
-                      if (_textController.text.isNotEmpty) {
-                        _conversation.sendRequest(
-                          ChatMessage.user(_textController.text),
-                        );
-                        _textController.clear();
-                      }
-                    },
+                    onPressed: _sendMessage,
                     child: const Text('Send'),
                   ),
                 ],
