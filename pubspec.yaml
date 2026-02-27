@@ -19,6 +19,8 @@ dependencies:
       url: git@github.com:flutter/genui.git
       ref: c107f49f532a6d49991fa011a19e9f9191ce1488
       path: packages/genui
+  record: ^6.2.0
+  path_provider: ^2.1.5
 
 dev_dependencies:
   flutter_test:

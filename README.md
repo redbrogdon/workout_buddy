@@ -1,7 +1,7 @@
 # Workout Buddy
 
 ## Overview
-**Workout Buddy** is a next-generation fitness application that uses advanced AI to serve as a true training partner. Unlike traditional apps that rely on static, pre-written plans, Workout Buddy uses a generative "Agent" to architect, guide, and analyze your workouts in real-time.
+**Workout Buddy** is a agentic fitness application that uses Generative AI and Generative UI. Unlike traditional apps that rely on static, pre-written plans, Workout Buddy uses a generative "Agent" to architect, guide, and analyze your workouts in real-time, and builds user interface components on the fly to guide you through planning, executing, and tracking your workouts.
 
 The application adapts to you, negotiating the plan based on how you feel today, and managing the flow of the workout dynamically.
 
@@ -17,25 +17,25 @@ The core philosophy of the app is that of a knowledgeable, adaptive personal tra
 ## How It Works: The Three Modes
 The application is designed around three distinct phases of a workout session. The Agent manages the transition between these modes.
 
-### 1. Plan Mode (The Negotiation)
+### 1. Plan Mode
 **Goal:** Create a tailored workout for the current moment.
 
-* **Intake:** Upon launch, the Agent presents a quick "Intake Wizard" to gather your immediate context (e.g., "15 Minutes," "Low Energy," "Upper Body Focus").
+* **Intake:** Upon launch, the Agent starts a conversation to determine your goals and constraints. It might ask about your overall energy level, how much time and space is available, and whether you're experiencing any soreness or injuries.
 * **Proposal:** The Agent generates a visual list of exercises proposed for the session.
-* **Interaction:** This is an interactive process. You can manually swipe to delete or tap to swap exercises. Alternatively, you can chat with the Agent (e.g., "Swap the pushups for something easier"), and the plan will update instantly.
-* **Start:** Once you are satisfied with the routine, you tap "Start Workout" to lock the plan.
+* **Iteration:** You can suggest changes to the workout, either by manually deleting or swapping exercises, or by chatting with the Agent (e.g., "Swap the pushups for something easier"). The plan will update in response.
+* **Start:** Once you are satisfied with the routine, you tap "Start Workout" to begin the session.
 
 ### 2. Execution Mode (The Workout)
 **Goal:** Complete the workout with real-time guidance.
 
 * **Main Stage (Center Screen):** This area changes dynamically based on what you are doing:
     * *Instruction:* Shows video loops and form cues.
-    * *Action:* Displays large timers for static holds (like Planks) or rep counters for dynamic moves.
-    * *Feedback:* Occasionally asks "How was that set?" to adjust the intensity of the rest of the workout on the fly.
+    * *Action:* Displays large timers for static holds (like Planks) or rep counters for dynamic moves. You can use controls to indicate the number of reps or time actually performed.
+    * *Feedback:* Occasionally asks "How was that set?" to adjust the intensity of the rest of the workout on the fly, or to switch up exercises in the workout plan if your feelings have changed.
 * **Session Dashboard (Bottom):** A persistent bar stays on screen to show your overall progress (e.g., "Exercise 3 of 8" and "Total Time Elapsed").
-* **The Coach:** The Agent can provide encouragement and tips via unobtrusive messages without interrupting the flow.
 
 ### 3. Report Mode (The Analysis)
 **Goal:** Review performance and track long-term trends.
 
 * **Recap:** Immediately after finishing, you see a summary receipt of your volume and time.
+* **History:** The agent can display charts and graphs to show how your performance has changed over time.

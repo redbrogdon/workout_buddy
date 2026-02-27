@@ -7,6 +7,8 @@ import 'package:firebase_ai/firebase_ai.dart';
 import 'package:flutter/material.dart';
 import 'package:genui/genui.dart' hide TextPart;
 import 'package:genui/genui.dart' as genui;
+import 'package:record/record.dart';
+import 'package:path_provider/path_provider.dart';
 
 import 'catalog/reps_card.dart';
 import 'catalog/timer_card.dart';
@@ -61,6 +63,8 @@ class _MyHomePageState extends State<MyHomePage> {
 
   final _textController = TextEditingController();
   final _scrollController = ScrollController();
+
+  bool _isRecording = false;
 
   void _onSurfaceAdded(String id) {
     setState(() => _surfaceIds.add(id));
@@ -135,6 +139,14 @@ class _MyHomePageState extends State<MyHomePage> {
 
     if (response.text?.isNotEmpty ?? false) {
       _transport.addChunk(response.text!);
+    }
+  }
+
+  Future<void> _toggleRecording() async {
+    if (_isRecording) {
+      setState(() => _isRecording = false);
+    } else {
+      setState(() => _isRecording = true);
     }
   }
 
@@ -234,7 +246,13 @@ class _MyHomePageState extends State<MyHomePage> {
                       ),
                     ),
                   ),
-                  const SizedBox(width: 16),
+                  const SizedBox(width: 8),
+                  IconButton(
+                    icon: Icon(_isRecording ? Icons.stop : Icons.mic),
+                    color: _isRecording ? Colors.red : null,
+                    onPressed: _toggleRecording,
+                  ),
+                  const SizedBox(width: 8),
                   ElevatedButton(
                     onPressed: _sendMessage,
                     child: const Text('Send'),
