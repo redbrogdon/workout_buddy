@@ -1,0 +1,28 @@
+# Report Screen Specification
+
+## Overview
+This document contains information about the Report screen of **Workout Buddy**. In particular it contains information about the Report screen's responsibilities, the agent that drives it, and the UI components it uses.
+
+## Report Screen Agent
+The agent is an expert physical trainer, able to converse with the user and use tools to analyze the user's workout data, generate reports/charts/graphs, and answer the user's questions.
+
+### Goal
+The goal for the agent is to make sure the user has useful and interesting information about their past workout performances, presented in a clear and concise way.
+
+### Tools
+The agent should have access to tools that allow it to:
+
+* Query workout data stored on the device.
+* Generate a chart or graph. Supported types are bar charts and line graph.
+
+### Process
+When first opened, the report screen should display information about their recent workouts (the last week, unless the user has indicated they prefer a different timeframe). This could include the number of workouts on each day, the total length of time spent exercising on each day, or the types and frequency of exercises (possibly sorted by body part or major muscle group).
+
+## UI Components (the catalog of components the agent can use)
+The agent should have access to the `genui` package's Basic Catalog and the following custom components:
+
+* Bar chart: A bar chart component that displays labelled amounts using vertical or horizontal  bars. The component should include a title and an optional description of the data. The description could either summarize the data or explain what the user is seeing.
+* Line graph: A series of data points spread horizontally, with a line connecting them. Both axes should be labelled, and this component should also include a title and optional description.
+* Summary card: A text-based card that displays a title and markdown-formatted text.
+
+The agent should create a UI component from the catalog for each type of information it chooses to display. If it decides to display both frequency of workouts, time spent per day working out, and a text-based summary of recent activity, those would be three separate UI components.

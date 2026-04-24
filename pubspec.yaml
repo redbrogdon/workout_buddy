@@ -14,13 +14,7 @@ dependencies:
   firebase_core: ^4.4.0
   firebase_ai: ^3.8.0
   cupertino_icons: ^1.0.8
-  genui:
-    git:
-      url: git@github.com:flutter/genui.git
-      ref: c107f49f532a6d49991fa011a19e9f9191ce1488
-      path: packages/genui
-  record: ^6.2.0
-  path_provider: ^2.1.5
+  genui: ^0.8.0
 
 dev_dependencies:
   flutter_test:

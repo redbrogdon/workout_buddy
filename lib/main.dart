@@ -7,8 +7,6 @@ import 'package:firebase_ai/firebase_ai.dart';
 import 'package:flutter/material.dart';
 import 'package:genui/genui.dart' hide TextPart;
 import 'package:genui/genui.dart' as genui;
-import 'package:record/record.dart';
-import 'package:path_provider/path_provider.dart';
 
 import 'catalog/reps_card.dart';
 import 'catalog/timer_card.dart';
