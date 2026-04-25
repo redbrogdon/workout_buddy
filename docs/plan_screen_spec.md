@@ -1,3 +1,5 @@
+[Back to Application Specification](application_spec.md) | [Back to Architecture Documentation](architecture.md)
+
 # Plan Screen Specification
 
 ## Overview
@@ -25,9 +27,20 @@ After that, the agent and the user are in a human-in-the-loop negotiation. The u
 * Request changes (either through chat messages or by interacting with the UI elements presenting the workout plan), after which the agent will produce a new draft workout plan to replace the previous one.
 
 ## UI Components (the catalog of components the agent can use)
+See [Catalog Schemas](catalog_schemas.md) for technical definitions of these components.
+
 The agent should have access to the `genui` package's Basic Catalog and the following custom components:
 
-* `WorkoutPlanCard` - Displays a draft workout plan and includes a button to start the workout.
+* `WorkoutCard` - Displays a draft workout plan and includes a button to start the workout.
 * `ExerciseTile` - Displays a single exercise in the workout plan, including its name, number of sets, and number of repetitions or time. It should offer controls for the user to quickly swap the exercise for another one, or to delete it.
 
-The agent should only ever display one `WorkoutPlanCard` at a time. When the agent modifies the draft workout plan, it should update the data model for the existing WorkoutPlanCard rather than create a second one.
+The agent should only ever display one `WorkoutCard` at a time. When the agent modifies the draft workout plan, it should update the data model for the existing WorkoutCard rather than create a second one.
+
+## UI Composition
+In general, the composition of the UI should be:
+
+* A main content area that scrolls to display content. Within that area are:
+  - A pinned `WorkoutCard` displaying the current draft plan for the workout.
+  - A list of messages between the user and the agent in chronological order.
+* A persistent "Chat Input Bar" consisting of a text field and a "send" button for the user to type and send messages to the agent. This should be positioned above the navigation bar.
+* A navigation bar at the bottom of the screen for switching between the Plan, Workout, and Report screens. This should be the same navigation bar as is present in other screens.

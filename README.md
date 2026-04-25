@@ -39,3 +39,12 @@ The application is designed around three distinct phases of a workout session. T
 
 * **Recap:** Immediately after finishing, you see a summary receipt of your volume and time.
 * **History:** The agent can display charts and graphs to show how your performance has changed over time.
+
+---
+
+## Documentation
+- [Application Specification](docs/application_spec.md)
+- [Technical Architecture](docs/architecture.md)
+- [Plan Screen Spec](docs/plan_screen_spec.md)
+- [Workout Screen Spec](docs/workout_screen_spec.md)
+- [Report Screen Spec](docs/report_screen_spec.md)
