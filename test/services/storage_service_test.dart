@@ -15,33 +15,15 @@ void main() {
     storageService = FileStorageService(fs: fs, basePath: basePath);
   });
 
-  group('StorageService - Active Session', () {
-    test('Should save and read active session', () async {
-      final session = WorkoutSessionRecord(createdTimestamp: DateTime(2024));
-      await storageService.saveActiveSession(session);
-
-      final recovered = await storageService.readActiveSession();
-      expect(recovered, isNotNull);
-      expect(recovered!.createdTimestamp, session.createdTimestamp);
-    });
-
-    test('Should clear active session', () async {
-      final session = WorkoutSessionRecord(createdTimestamp: DateTime(2024));
-      await storageService.saveActiveSession(session);
-      await storageService.clearActiveSession();
-
-      final recovered = await storageService.readActiveSession();
-      expect(recovered, isNull);
-    });
-  });
-
   group('StorageService - History', () {
     test('Should append sessions to history (newest first)', () async {
       final session1 = WorkoutSessionRecord(
+        id: '1',
         createdTimestamp: DateTime(2024, 1, 1),
         overallFeedback: 'One',
       );
       final session2 = WorkoutSessionRecord(
+        id: '2',
         createdTimestamp: DateTime(2024, 1, 2),
         overallFeedback: 'Two',
       );
@@ -53,6 +35,26 @@ void main() {
       expect(history.length, 2);
       expect(history[0].overallFeedback, 'Two'); // Newest first
       expect(history[1].overallFeedback, 'One');
+    });
+
+    test('Should update existing session in history (upsert)', () async {
+      final session = WorkoutSessionRecord(
+        id: 'session-1',
+        createdTimestamp: DateTime(2024, 1, 1),
+        overallFeedback: 'Initial',
+      );
+      await storageService.saveToHistory(session);
+
+      final updatedSession = WorkoutSessionRecord(
+        id: 'session-1',
+        createdTimestamp: DateTime(2024, 1, 1),
+        overallFeedback: 'Updated',
+      );
+      await storageService.saveToHistory(updatedSession);
+
+      final history = await storageService.readHistory();
+      expect(history.length, 1);
+      expect(history[0].overallFeedback, 'Updated');
     });
   });
 

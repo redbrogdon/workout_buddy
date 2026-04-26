@@ -7,6 +7,7 @@ void main() {
     test('Should survive round-trip JSON serialization', () {
       final now = DateTime.utc(2024, 1, 1, 12, 0, 0);
       final session = WorkoutSessionRecord(
+        id: 'test-id',
         createdTimestamp: now,
         startedTimestamp: now.add(const Duration(minutes: 5)),
         completedTimestamp: now.add(const Duration(minutes: 35)),

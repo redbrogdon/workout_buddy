@@ -20,26 +20,42 @@ final storageToolsProvider = Provider<List<Tool>>((ref) {
         },
       ),
       AutoFunctionDeclaration(
-        name: 'saveActiveSession',
-        description: 'Saves the current active workout session to history.',
+        name: 'saveWorkoutSession',
+        description:
+            'Saves or updates a workout session in the user\'s history. Use a unique ID to update an existing session (e.g. as exercises are completed).',
         parameters: {
           'session': Schema.object(
-            description: 'The workout session data to save.',
+            description: 'The workout session data to save or update.',
             properties: {
+              'id': Schema.string(
+                description:
+                    'A unique identifier for this session. Use the same ID to update progress.',
+              ),
               'name': Schema.string(description: 'Name of the workout'),
               'exercises': Schema.array(
                 items: Schema.object(
                   properties: {
                     'name': Schema.string(),
-                    'sets': Schema.integer(),
-                    'repetitions': Schema.integer(),
-                    'duration': Schema.integer(),
-                    'isCompleted': Schema.boolean(),
+                    'suggestedDuration': Schema.integer(),
+                    'numberOfReps': Schema.integer(),
+                    'actualDuration': Schema.integer(),
+                    'repsCompleted': Schema.integer(),
+                    'exerciseFeedback': Schema.string(),
+                    'completedTimestamp': Schema.string(),
+                    'wasSkipped': Schema.boolean(),
                   },
                 ),
               ),
-              'startTime': Schema.string(description: 'ISO timestamp'),
-              'completedTimestamp': Schema.string(description: 'ISO timestamp'),
+              'createdTimestamp': Schema.string(
+                description: 'ISO timestamp of when the session was created.',
+              ),
+              'startedTimestamp': Schema.string(
+                description:
+                    'ISO timestamp of when the workout actually began.',
+              ),
+              'completedTimestamp': Schema.string(
+                description: 'ISO timestamp of when the workout was finished.',
+              ),
               'overallFeedback': Schema.string(),
             },
           ),
@@ -48,7 +64,6 @@ final storageToolsProvider = Provider<List<Tool>>((ref) {
           final sessionJson = args['session'] as Map<String, dynamic>;
           final session = WorkoutSessionRecord.fromJson(sessionJson);
           await storage.saveToHistory(session);
-          await storage.clearActiveSession();
           return {'status': 'success'};
         },
       ),
@@ -59,15 +74,6 @@ final storageToolsProvider = Provider<List<Tool>>((ref) {
         callable: (args) async {
           final prefs = await storage.readPreferences();
           return prefs.toJson();
-        },
-      ),
-      AutoFunctionDeclaration(
-        name: 'readActiveSession',
-        description: 'Reads the current active workout session plan.',
-        parameters: {},
-        callable: (args) async {
-          final session = await storage.readActiveSession();
-          return session?.toJson() ?? {};
         },
       ),
     ]),

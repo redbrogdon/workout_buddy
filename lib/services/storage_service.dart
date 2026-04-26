@@ -8,10 +8,7 @@ import '../models/user_preferences.dart';
 
 /// Abstract interface for application storage.
 abstract class StorageService {
-  Future<void> saveActiveSession(WorkoutSessionRecord session);
-  Future<WorkoutSessionRecord?> readActiveSession();
-  Future<void> clearActiveSession();
-
+  /// Saves a session to history. If a session with the same ID already exists, it is updated.
   Future<void> saveToHistory(WorkoutSessionRecord session);
   Future<List<WorkoutSessionRecord>> readHistory();
 
@@ -31,35 +28,14 @@ class FileStorageService implements StorageService {
   File _getFile(String fileName) => _fs.file(p.join(_basePath, fileName));
 
   @override
-  Future<void> saveActiveSession(WorkoutSessionRecord session) async {
-    final file = _getFile('active_session.json');
-    await file.writeAsString(jsonEncode(session.toJson()));
-  }
-
-  @override
-  Future<WorkoutSessionRecord?> readActiveSession() async {
-    final file = _getFile('active_session.json');
-    if (!await file.exists()) return null;
-    try {
-      final content = await file.readAsString();
-      return WorkoutSessionRecord.fromJson(jsonDecode(content));
-    } catch (_) {
-      return null;
-    }
-  }
-
-  @override
-  Future<void> clearActiveSession() async {
-    final file = _getFile('active_session.json');
-    if (await file.exists()) {
-      await file.delete();
-    }
-  }
-
-  @override
   Future<void> saveToHistory(WorkoutSessionRecord session) async {
     final history = await readHistory();
-    history.insert(0, session);
+    final index = history.indexWhere((e) => e.id == session.id);
+    if (index >= 0) {
+      history[index] = session;
+    } else {
+      history.insert(0, session);
+    }
     final file = _getFile('workout_history.json');
     await file.writeAsString(
       jsonEncode(history.map((e) => e.toJson()).toList()),
@@ -104,35 +80,18 @@ class SharedPreferencesStorageService implements StorageService {
 
   SharedPreferencesStorageService(this._prefs);
 
-  static const _activeKey = 'active_session';
   static const _historyKey = 'workout_history';
   static const _preferencesKey = 'user_preferences';
 
   @override
-  Future<void> saveActiveSession(WorkoutSessionRecord session) async {
-    await _prefs.setString(_activeKey, jsonEncode(session.toJson()));
-  }
-
-  @override
-  Future<WorkoutSessionRecord?> readActiveSession() async {
-    final content = _prefs.getString(_activeKey);
-    if (content == null) return null;
-    try {
-      return WorkoutSessionRecord.fromJson(jsonDecode(content));
-    } catch (_) {
-      return null;
-    }
-  }
-
-  @override
-  Future<void> clearActiveSession() async {
-    await _prefs.remove(_activeKey);
-  }
-
-  @override
   Future<void> saveToHistory(WorkoutSessionRecord session) async {
     final history = await readHistory();
-    history.insert(0, session);
+    final index = history.indexWhere((e) => e.id == session.id);
+    if (index >= 0) {
+      history[index] = session;
+    } else {
+      history.insert(0, session);
+    }
     await _prefs.setString(
       _historyKey,
       jsonEncode(history.map((e) => e.toJson()).toList()),

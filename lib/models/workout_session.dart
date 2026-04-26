@@ -49,6 +49,7 @@ class ExerciseRecord {
 }
 
 class WorkoutSessionRecord {
+  final String id;
   final DateTime createdTimestamp;
   final DateTime? startedTimestamp;
   final DateTime? completedTimestamp;
@@ -56,6 +57,7 @@ class WorkoutSessionRecord {
   final List<ExerciseRecord> exercises;
 
   WorkoutSessionRecord({
+    required this.id,
     required this.createdTimestamp,
     this.startedTimestamp,
     this.completedTimestamp,
@@ -65,6 +67,7 @@ class WorkoutSessionRecord {
 
   Map<String, dynamic> toJson() {
     return {
+      'id': id,
       'createdTimestamp': createdTimestamp.toIso8601String(),
       'startedTimestamp': startedTimestamp?.toIso8601String(),
       'completedTimestamp': completedTimestamp?.toIso8601String(),
@@ -74,8 +77,10 @@ class WorkoutSessionRecord {
   }
 
   factory WorkoutSessionRecord.fromJson(Map<String, dynamic> json) {
+    final createdStr = json['createdTimestamp'] as String;
     return WorkoutSessionRecord(
-      createdTimestamp: DateTime.parse(json['createdTimestamp'] as String),
+      id: json['id'] as String? ?? createdStr,
+      createdTimestamp: DateTime.parse(createdStr),
       startedTimestamp: json['startedTimestamp'] != null
           ? DateTime.parse(json['startedTimestamp'] as String)
           : null,

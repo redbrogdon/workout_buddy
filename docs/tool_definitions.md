@@ -2,73 +2,31 @@
 
 # Agent Tool Definitions
 
-This document defines the technical signatures for the tools available to the Workout Buddy agents. These tools allow the agents to interact with the device's sensors and local storage.
+This document defines the technical signatures for the tools available to the Workout Buddy agents. These tools allow the agents to interact with local storage to manage preferences and history.
 
 ---
 
 ## 1. User Profile & Preferences
 
-### `getPreferences()`
-*   **Description:** Retrieves the natural language preference string for the current user.
-*   **Returns:** A string containing fav/hated exercises, injuries, and personal vibe preferences.
-
-### `updatePreferences(newPreferenceDescription)`
-*   **Description:** Overwrites the current user preference string with a new description.
-*   **Arguments:**
-    - `newPreferenceDescription` (string): The updated profile.
+### `readPreferences()`
+*   **Description:** Retrieves the natural language preference description for the current user.
+*   **Returns:** A JSON object containing the user's fitness profile (goals, injuries, favorite exercises, etc.).
 
 ---
 
-## 2. Workout History (Storage)
+## 2. Workout History
 
-### `queryWorkoutHistory(startDate?, endDate?, limit?)`
-*   **Description:** Retrieves a high-level list of previous workout sessions.
-*   **Arguments:**
-    - `startDate` (string, ISO 8601): Filter sessions after this date.
-    - `endDate` (string, ISO 8601): Filter sessions before this date.
-    - `limit` (integer): Maximum number of results to return.
-*   **Returns:** A list of session summaries containing:
-    - `sessionId` (string)
-    - `date` (string)
-    - `title` (string)
-    - `totalDurationSeconds` (integer)
-    - `successRate` (number, 0-1)
+### `readHistory()`
+*   **Description:** Retrieves the entire workout history log stored on the device.
+*   **Returns:** A list of all previous `WorkoutSessionRecord` objects.
 
-### `getWorkoutDetails(sessionId)`
-*   **Description:** Retrieves the full, exercise-level data for a specific previous session.
+### `saveWorkoutSession(session)`
+*   **Description:** Saves or updates a workout session in the history log. 
+*   **Details:** To perform incremental updates (e.g., after every exercise), the Agent must provide a unique session `id`. If a record with that ID already exists, it will be overwritten with the new data; otherwise, a new record is created.
 *   **Arguments:**
-    - `sessionId` (string): The unique ID of the session.
-*   **Returns:** The full Workout Session Record as defined in [data_schemas.md](data_schemas.md).
-
-### `getExerciseTrends(exerciseName)`
-*   **Description:** Helper tool to retrieve historical performance specifically for one exercise.
-*   **Arguments:**
-    - `exerciseName` (string): The name of the exercise (e.g., "Pushups").
-*   **Returns:** A list of data points containing `date`, `reps`, `weight`, and `duration`.
+    - `session` (object): The full `WorkoutSessionRecord` data as defined in [data_schemas.md](data_schemas.md).
 
 ---
 
-## 3. Environment & Location
-
-### `getLocation()`
-*   **Description:** Retrieves the user's current GPS coordinates and city name.
-*   **Returns:**
-    - `latitude`, `longitude`, `city`, `state/country`.
-
-### `getWeather(location?)`
-*   **Description:** Retrieves the current weather forecast.
-*   **Arguments:**
-    - `location` (optional): If not provided, uses the user's current location.
-*   **Returns:**
-    - `temperature` (celsius)
-    - `condition` (e.g., "Rainy", "Sunny", "Hot")
-    - `recommendation` (e.g., "Good for outdoor run" or "Better for indoor weights")
-
----
-
-## 4. Active Session Recording
-
-### `recordWorkout(sessionData)`
-*   **Description:** Saves a finalized workout session to the device's history.
-*   **Arguments:**
-    - `sessionData`: The complete record defined in [data_schemas.md](data_schemas.md).
+## 3. Note on Implementation
+While the agents may express interest in external data (like weather or location), current version focus is on **Local Persistence** only. Future tools for environment sensing will be documented here once implemented.

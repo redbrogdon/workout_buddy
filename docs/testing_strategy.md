@@ -7,41 +7,44 @@ This document outlines the approach for verifying the deterministic components o
 ---
 
 ## 1. Unit Testing (Data & Logic)
-Unit tests should focus on the integrity of the data models and the storage handoff logic.
+Unit tests focus on the integrity of the data models and the storage persistence logic.
 
 ### Data Models
-*   **Serialization:** Verify that `WorkoutRecord` and `ExerciseRecord` can be correctly serialized to and from JSON.
-*   **Validation:** Test that the models handle edge cases, such as missing timestamps or optional feedback strings, without crashing.
+*   **Serialization:** Verify that `WorkoutSessionRecord` and `ExerciseRecord` can be correctly serialized to and from JSON, including the unique session ID.
+*   **Validation:** Test that models handle edge cases (missing timestamps, optional feedback) gracefully.
 
 ### Storage Service
-*   **Handoff Logic:** Verify the service responsible for moving data from `current_session.json` to the long-term history files.
+*   **Upsert Logic:** Verify that `saveToHistory` correctly identifies existing sessions by ID and updates them instead of creating duplicates.
 *   **Preference Management:** Test that the "User Preferences" string is correctly read and updated.
 
 ### Pure Logic
-*   **Calculations:** Test any logic used to calculate "Success Rates" or "Total Volume" for the Report screen.
+*   **Calculations:** Test logic used for reporting (e.g., aggregating volume or frequency for charts).
 
 ---
 
 ## 2. Widget Testing (GenUI Catalog)
-Every component defined in the [Catalog Schemas](catalog_schemas.md) must have a dedicated widget test to ensure it behaves correctly for the Agent.
+Every component defined in the [Catalog Schemas](catalog_schemas.md) must have a dedicated widget test.
 
 ### `TimerCard` Tests
-*   **Timer State:** Verify that tapping "Play" starts the incrementing timer and "Pause" stops it.
-*   **Interactive Constraints:** Ensure the "Check" button correctly passes the `actualDuration` to the `completeAction` callback.
-*   **Reset:** Verify the refresh button resets the local timer state to zero.
+*   **Timer State:** Verify that start/pause/reset controls work as expected.
+*   **Completion:** Ensure the completion callback passes the `actualDuration` correctly.
 
 ### `RepsCard` Tests
-*   **Counters:** Verify the up/down arrows correctly modify the "Reps Completed" count.
-*   **Completion:** Ensure the checkmark button dispatches the correct `UserActionEvent` with the final rep count.
+*   **Counters:** Verify that rep increment/decrement controls work correctly.
+*   **Completion:** Ensure the checkmark button dispatches the callback with the final count.
 
 ### `WorkoutCard` / `ExerciseTile` Tests
-*   **Layout:** Verify that the card displays the correct number of chips/tiles.
-*   **Actions:** Test that tapping "Delete" or "Swap" on an `ExerciseTile` triggers the appropriate action callback.
+*   **Layout:** Verify the card displays the proposed plan correctly.
+*   **Actions:** Test that "Delete" or "Swap" on an `ExerciseTile` triggers the appropriate callbacks.
 
 ---
 
 ## 3. Integration Testing
-Focus on the technical "Bridge" between screens.
+Focus on the technical flow within and between screens.
 
-*   **Navigation & State:** Test that triggering a "Start Workout" action on the Plan screen results in the correct `current_session.json` being created and the app navigating to the Workout screen.
-*   **Session Persistence:** Verify that if the app is closed and reopened during a workout, the Workout Agent can resume from the saved state in local storage.
+### Unified Workout Flow
+*   **Phase Transition:** Test that triggering "Start Workout" in Phase 1 causes the Agent to transition the UI to Phase 2 (Execution) while maintaining session state.
+*   **Incremental History:** Verify that completing an exercise in Phase 2 results in an immediate, partial update to `workout_history.json`.
+
+### Navigation
+*   **Manual Tab Switching:** Verify that the user can move between Workout and Report screens via the bottom bar and that the Agent state for each screen is preserved.

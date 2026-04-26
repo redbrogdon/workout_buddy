@@ -23,7 +23,7 @@ final timerCardSchema = S.object(
           'Whether or not the exercise has been completed yet (initial value '
           'is false)',
     ),
-    'completeAction': A2uiSchemas.action(
+    'onComplete': A2uiSchemas.action(
       description:
           'The action performed when the user has completed the exercise. '
           'I will provide the duration the user performed the exercise as '
@@ -36,7 +36,7 @@ final timerCardSchema = S.object(
     'suggestedDuration',
     'actualDuration',
     'isCompleted',
-    'completeAction',
+    'onComplete',
   ],
 );
 
@@ -46,7 +46,7 @@ class TimerCardData {
   final int suggestedDuration;
   final int actualDuration;
   final bool isCompleted;
-  final JsonMap? completeAction;
+  final JsonMap? onComplete;
 
   TimerCardData({
     required this.exercise,
@@ -54,7 +54,7 @@ class TimerCardData {
     required this.suggestedDuration,
     required this.actualDuration,
     required this.isCompleted,
-    this.completeAction,
+    this.onComplete,
   });
 
   factory TimerCardData.fromJson(Map<String, Object?> json) {
@@ -65,7 +65,7 @@ class TimerCardData {
         suggestedDuration: json['suggestedDuration'] as int,
         actualDuration: json['actualDuration'] as int,
         isCompleted: json['isCompleted'] as bool,
-        completeAction: json['completeAction'] as JsonMap?,
+        onComplete: json['onComplete'] as JsonMap?,
       );
     } catch (_) {
       throw Exception('Invalid JSON for TimerCardData');
@@ -83,7 +83,7 @@ final timerCard = CatalogItem(
     return TimerCard(
       data: data,
       onCompleted: (actualDuration) async {
-        final action = data.completeAction;
+        final action = data.onComplete;
         if (action == null) {
           return;
         }

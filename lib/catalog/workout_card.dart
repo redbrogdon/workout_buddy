@@ -6,15 +6,19 @@ final workoutCardSchema = S.object(
   properties: {
     'component': S.string(enumValues: ['WorkoutCard']),
     'title': S.string(description: 'The title of the workout'),
+    'description': S.string(
+      description: 'A brief overview or motivation for the workout.',
+    ),
     'exercises': S.list(
       description: 'A list of 3-5 exercises to perform as part of the workout',
       items: S.string(
         description:
             'The type of exercise to perform, including name and details '
-            'like the amount of reps. 50 characters max.',
+            'like the amount of reps.',
         minLength: 3,
-        maxLength: 5,
       ),
+      minItems: 3,
+      maxItems: 5,
     ),
     'onStart': A2uiSchemas.action(
       description: 'Action to trigger when starting the workout',
@@ -25,14 +29,20 @@ final workoutCardSchema = S.object(
 
 class WorkoutCardData {
   final String title;
+  final String? description;
   final List<String> exercises;
 
-  WorkoutCardData({required this.title, required this.exercises});
+  WorkoutCardData({
+    required this.title,
+    this.description,
+    required this.exercises,
+  });
 
   factory WorkoutCardData.fromJson(Map<String, Object?> json) {
     try {
       return WorkoutCardData(
         title: json['title'] as String,
+        description: json['description'] as String?,
         exercises: List<String>.from(json['exercises'] as List),
       );
     } catch (_) {
@@ -99,6 +109,15 @@ class WorkoutCard extends StatelessWidget {
               ),
             ),
           ),
+          if (data.description != null)
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 16.0),
+              child: Text(
+                data.description!,
+                key: const ValueKey('workout_description'),
+                style: theme.textTheme.bodyMedium,
+              ),
+            ),
           const Divider(),
           Padding(
             padding: const EdgeInsets.all(16.0),

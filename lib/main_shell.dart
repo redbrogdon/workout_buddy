@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'screens/plan_screen.dart';
 import 'screens/workout_screen.dart';
 import 'screens/report_screen.dart';
 import 'providers/navigation_providers.dart';
@@ -16,14 +15,12 @@ class _MainShellState extends ConsumerState<MainShell> {
   late final PageController _pageController;
 
   static const List<Widget> _screens = [
-    PlanScreen(),
     WorkoutScreen(),
     ReportScreen(),
   ];
 
   static const List<String> _titles = [
-    'Plan Your Workout',
-    'Active Session',
+    'Workout',
     'Performance Report',
   ];
 
@@ -65,10 +62,6 @@ class _MainShellState extends ConsumerState<MainShell> {
       ),
       bottomNavigationBar: BottomNavigationBar(
         items: const <BottomNavigationBarItem>[
-          BottomNavigationBarItem(
-            icon: Icon(Icons.edit_calendar),
-            label: 'Plan',
-          ),
           BottomNavigationBarItem(
             icon: Icon(Icons.fitness_center),
             label: 'Workout',

@@ -11,37 +11,6 @@ final storageServiceProvider = Provider<StorageService>((ref) {
   );
 });
 
-/// Tracks the active workout session, if any.
-final activeSessionProvider =
-    NotifierProvider<ActiveSessionNotifier, WorkoutSessionRecord?>(
-      ActiveSessionNotifier.new,
-    );
-
-class ActiveSessionNotifier extends Notifier<WorkoutSessionRecord?> {
-  StorageService get _storage => ref.read(storageServiceProvider);
-
-  @override
-  WorkoutSessionRecord? build() {
-    // Initial load happens asynchronously in main shell or here if we use AsyncNotifier.
-    // For now, we initialize as null and load manually.
-    return null;
-  }
-
-  Future<void> load() async {
-    state = await _storage.readActiveSession();
-  }
-
-  Future<void> save(WorkoutSessionRecord session) async {
-    await _storage.saveActiveSession(session);
-    state = session;
-  }
-
-  Future<void> clear() async {
-    await _storage.clearActiveSession();
-    state = null;
-  }
-}
-
 /// Tracks the entire workout history.
 final historyProvider =
     NotifierProvider<HistoryNotifier, List<WorkoutSessionRecord>>(

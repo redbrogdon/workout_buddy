@@ -3,40 +3,59 @@
 # Workout Screen Specification
 
 ## Overview
-This document contains information about the Workout screen of **Workout Buddy**. In particular it contains information about the Workout screen's responsibilities, the agent that drives it, and the UI components it uses.
+This document contains information about the Workout screen of **Workout Buddy**. The Workout screen is the primary interface where the user designs and executes their workout session. It is driven by an Agent that manages two distinct phases: **Planning & Negotiation** and **Execution & Tracking**.
 
 ## Workout Screen Agent
-The agent is a dynamic orchestrator and guide, responsible for leading the user through their workout plan, handling mid-session adjustments, and capturing performance data.
+The agent is a dynamic orchestrator and guide, responsible for leading the user through the entire lifecycle of a workout session.
 
 ### Goal
-The goal for the agent is to guide the user through the accepted workout plan, allowing for real-time modifications and recording the actual effort (reps/time) performed for each exercise to local storage.
+The goal for the agent is to help the user design a tailored bodyweight workout plan and then guide them through its execution, recording performance data incrementally to local storage.
 
 ### Tools
-The agent should have access to tools that allow it to:
+The agent has access to tools that allow it to:
 
-* Record workout performance data to local storage.
+*   **Read Preferences**: Understand the user's general goals and workout style.
+*   **Read History**: Review past performance to suggest progressive overload.
+*   **Save Workout Session**: Record or update the session record in history (incrementally or finally).
 
-### Process
-The agent should present the first exercise in the plan and then wait for the user to indicate they have completed it before moving to the next. While this is happening, the agent should display the SessionSummary component to show the user's progress through the workout plan. Once the entire workout plan is complete, the agent should congratulate the user and then suggest they navigate to the Report screen.
+---
 
-The agent should manage the "Instruction vs. Action" flow by allowing the user to toggle detailed exercise descriptions. This can be done via chat (e.g., "How do I do this?") or by the user interacting with UI triggers like a chevron.
+## The Workflow
 
-If the user requests changes to the plan mid-workout (e.g., "Skip the next one" or "Replace pushups with something easier"), the agent should negotiate and update the remaining workout plan accordingly. This is done by **updating the existing UI components in-place** using their unique identifiers, rather than adding new ones to the conversation history.
+### Phase 1: Planning & Negotiation
+Upon launch, the Agent starts a conversation to determine the user's goals for today.
 
-Once the final exercise is completed, the agent should summarize the session and ensure all data is correctly recorded for later analysis.
+1.  **Intake**: The Agent asks about energy levels, time constraints, and any soreness.
+2.  **Proposal**: The Agent generates a `WorkoutCard` with a suggested plan (3-5 bodyweight exercises).
+3.  **Iteration**: The user can suggest changes via chat or by interacting with `ExerciseTile` components. The Agent updates these components **in-place**.
+4.  **Acceptance**: When the user is satisfied, they tap "Start Workout". The Agent saves the initial plan to history with a unique session ID.
 
-## UI Components (the catalog of components the agent can use)
-See [Catalog Schemas](catalog_schemas.md) for technical definitions of these components.
+### Phase 2: Execution & Tracking
+Once the workout begins, the screen transitions to focus on guiding the user through each exercise.
 
-The agent should have access to the `genui` package's Basic Catalog and the following custom components:
+1.  **Guidance**: The Agent presents the active exercise using a `TimerCard` or `RepsCard`.
+2.  **Tracking**: The Agent waits for the user to complete each set.
+3.  **In-Place Updates**: As the user progresses, the Agent updates the persistent `SessionSummary` and active cards using their unique identifiers.
+4.  **Incremental Persistence**: The Agent updates the session record in history after each exercise is completed or skipped.
+5.  **Finalization**: Once the last exercise is done, the Agent summarizes the performance and suggests navigating to the Report screen via the bottom bar.
 
-* `TimerCard` - Used for timed exercises (e.g., Planks). Includes a client-side timer, an expandable description section for form cues, and controls to adjust the final recorded time.
-* `RepsCard` - Used for exercises involving repetitions. Includes an expandable description section and input fields for the user to report the actual number of repetitions/sets performed.
-* `SessionSummary` - A persistent dashboard component that tracks overall progress (e.g., "Exercise 2 of 10") and total elapsed session time.
+---
 
-In general, the composition of the UI should be:
+## UI Components
+The agent uses the following custom components from the `workoutBuddyCatalog`:
 
-* A pinned, everpresent `SessionSummary` at the top of the screen.
-* One or more exercise cards (`TimerCard`, `RepsCard`, etc.) that the user can scroll through. New cards should appear only when the user progresses to that exercise in the workout plan.
-* A persistent "Chat Input Bar" consisting of a text field and a "send" button. The agent responds to user messages by updating the onscreen components in real-time; **there is no chronological message history** on this screen. 
-* A navigation bar at the bottom of the screen for switching between the Plan, Workout, and Report screens. This should be the same navigation bar as the Plan annd Report screens.
+### Planning Components
+*   **WorkoutCard**: High-level summary of the session plan. Includes an "onStart" action to begin the workout.
+*   **ExerciseTile**: Interactive tile for individual exercises during negotiation (supports delete/replace).
+
+### Execution Components
+*   **SessionSummary**: A persistent dashboard pinned at the top tracking overall progress (e.g., "Exercise 3 of 8").
+*   **TimerCard**: Active guidance for timed exercises (e.g., Planks) with a client-side timer.
+*   **RepsCard**: Active guidance for repetition-based moves (e.g., Pushups) with input for actual reps completed.
+
+## Composition & Layout
+*   **Pinned Header**: The `SessionSummary` (in Phase 2) or `WorkoutCard` (in Phase 1) should stay at the top.
+*   **Dynamic List**: Exercise cards appear below as the user progresses.
+*   **Chat Input**: A persistent bar at the bottom for communicating with the coach.
+*   **No History**: Chronological chat bubbles are suppressed; the Agent's responses are reflected in the UI cards.
+*   **Navigation**: A bottom bar allows manual switching between **Workout** and **Report** screens.

@@ -26,5 +26,8 @@ Verify the following architectural patterns:
 3. **Provider/State Scope**: Ensure that any new providers are correctly scoped and that test environments provide necessary overrides.
 4. **Clean Imports**: Ensure that imports are organized and that cross-package or internal path dependencies are consistent with the project's folder structure.
 
-### Step 5: Final Status
+### Step 5: Documentation Audit
+Check documentation files (e.g., in `docs/`) for any updates needed to keep pace with code changes that have been made. Ensure that specifications, schemas, and instructions remain accurate and consistent with the current implementation.
+
+### Step 6: Final Status
 Clearly state whether all checks passed. If any checks failed, you MUST continue working to resolve the issues before completing the task. If you are unable to resolve the issues, ask the user for help.

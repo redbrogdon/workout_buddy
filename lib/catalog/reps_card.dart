@@ -22,7 +22,7 @@ final repsCardSchema = S.object(
           'Whether or not the exercise has been completed yet (initial value '
           'is false)',
     ),
-    'completeAction': A2uiSchemas.action(
+    'onComplete': A2uiSchemas.action(
       description:
           'The action performed when the user has completed the exercise. '
           'I will provide the number of reps completed by the users as '
@@ -34,7 +34,7 @@ final repsCardSchema = S.object(
     'instructions',
     'numberOfReps',
     'isCompleted',
-    'completeAction',
+    'onComplete',
   ],
 );
 
@@ -44,7 +44,7 @@ class RepsCardData {
   final int numberOfReps;
   final int? repsCompleted;
   final bool isCompleted;
-  final JsonMap? completeAction;
+  final JsonMap? onComplete;
 
   RepsCardData({
     required this.exercise,
@@ -52,7 +52,7 @@ class RepsCardData {
     required this.numberOfReps,
     this.repsCompleted,
     required this.isCompleted,
-    this.completeAction,
+    this.onComplete,
   });
 
   factory RepsCardData.fromJson(Map<String, Object?> json) {
@@ -63,7 +63,7 @@ class RepsCardData {
         numberOfReps: json['numberOfReps'] as int,
         repsCompleted: json['repsCompleted'] as int?,
         isCompleted: json['isCompleted'] as bool,
-        completeAction: json['completeAction'] as JsonMap?,
+        onComplete: json['onComplete'] as JsonMap?,
       );
     } catch (_) {
       throw Exception('Invalid JSON for RepsCardData');
@@ -81,7 +81,7 @@ final repsCard = CatalogItem(
     return RepsCard(
       data: data,
       onCompleted: (reps) async {
-        final action = data.completeAction;
+        final action = data.onComplete;
         if (action == null) {
           return;
         }

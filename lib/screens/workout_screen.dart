@@ -24,6 +24,7 @@ class _WorkoutScreenState extends ConsumerState<WorkoutScreen> {
   @override
   void initState() {
     super.initState();
+    // Using 'workout' as the purpose for the consolidated agent
     _agent = ref.read(agentServiceProvider('workout'));
 
     _controller = SurfaceController(catalogs: [workoutBuddyCatalog]);
@@ -56,7 +57,7 @@ class _WorkoutScreenState extends ConsumerState<WorkoutScreen> {
   Future<void> _initializeAgent() async {
     final promptBuilder = PromptBuilder.chat(
       catalog: workoutBuddyCatalog,
-      systemPromptFragments: [_workoutScreenInstructions],
+      systemPromptFragments: [_unifiedWorkoutInstructions],
     );
     _conversation.sendRequest(
       ChatMessage.system(promptBuilder.systemPromptJoined()),
@@ -79,14 +80,17 @@ class _WorkoutScreenState extends ConsumerState<WorkoutScreen> {
 
   @override
   Widget build(BuildContext context) {
+    // Check if we have a summary or a main workout card
     final hasSummary = _surfaceIds.contains('summary');
-    final otherIds = _surfaceIds.where((id) => id != 'summary').toList();
+    final hasWorkoutCard = _surfaceIds.contains('workout_card');
+
+    // Sort surfaces to keep summary or main card at the top
+    final otherIds = _surfaceIds
+        .where((id) => id != 'summary' && id != 'workout_card')
+        .toList();
 
     return Column(
       children: [
-        if (hasSummary)
-          Surface(surfaceContext: _controller.contextFor('summary')),
-
         ValueListenableBuilder<ConversationState>(
           valueListenable: _conversation.state,
           builder: (context, state, child) {
@@ -95,6 +99,20 @@ class _WorkoutScreenState extends ConsumerState<WorkoutScreen> {
           },
         ),
 
+        if (hasSummary)
+          Padding(
+            padding: const EdgeInsets.all(8.0),
+            child: Surface(surfaceContext: _controller.contextFor('summary')),
+          ),
+
+        if (hasWorkoutCard)
+          Padding(
+            padding: const EdgeInsets.all(8.0),
+            child: Surface(
+              surfaceContext: _controller.contextFor('workout_card'),
+            ),
+          ),
+
         Expanded(
           child: ListView.builder(
             controller: _scrollController,
@@ -102,14 +120,17 @@ class _WorkoutScreenState extends ConsumerState<WorkoutScreen> {
             itemBuilder: (context, index) {
               final id = otherIds[index];
               return Padding(
-                padding: const EdgeInsets.only(bottom: 16.0),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 8.0,
+                  vertical: 4.0,
+                ),
                 child: Surface(surfaceContext: _controller.contextFor(id)),
               );
             },
           ),
         ),
 
-        // Chat input bar (no message history displayed)
+        // Chat input bar
         Padding(
           padding: const EdgeInsets.all(16.0),
           child: Row(
@@ -136,27 +157,42 @@ class _WorkoutScreenState extends ConsumerState<WorkoutScreen> {
     );
   }
 
-  static const _workoutScreenInstructions = '''
-You are the "Workout Coach" for Workout Buddy.
+  static const _unifiedWorkoutInstructions = '''
+You are the "Workout Buddy" — a knowledgeable, adaptive personal trainer.
 Your personality is cheerful, energetic, and supportive (Planet Fitness vibe).
 
-Your goal is to lead the user through their workout plan exercise by exercise.
+You manage the entire workout session in two phases:
 
-Process:
-1. Start by calling `readActiveSession` to understand the workout plan for today.
-2. Display a `SessionSummary` with the initial stats (use a persistent `surfaceId` like 'summary').
-3. Present the first exercise using either a `RepsCard` or a `TimerCard` (use a persistent `surfaceId` like 'exercise_1').
-4. Wait for the user to complete the exercise (you will receive an event).
-5. Update the `SessionSummary` and relevant `ExerciseTile` IN-PLACE.
-5. If the user asks for form tips or suggests a change, respond by updating the UI elements in-place where possible.
+### Phase 1: Planning & Negotiation
+Goal: Help the user design a tailored bodyweight workout for today.
+
+1. Start by reading the user's `readPreferences` and `readHistory` (quietly) to inform your greeting.
+2. Ask the user how they feel today (energy, soreness, time).
+3. Draft a `WorkoutCard` (use `surfaceId: 'workout_card'`) with a suggested plan (3-5 exercises).
+4. Negotiate changes using `ExerciseTile` components or by updating the `WorkoutCard`.
+5. When the user is ready, they will tap "Start Workout" on the card.
+
+### Phase 2: Execution & Tracking
+Goal: Lead the user through the plan exercise by exercise.
+
+1. When the workout starts, replace the planning UI with the execution UI.
+2. Display a `SessionSummary` (use `surfaceId: 'summary'`) to track overall progress.
+3. Present the active exercise using a `RepsCard` or `TimerCard` (use `surfaceId: 'active_exercise'`).
+4. Wait for the user to complete each set/exercise.
+5. UPDATE IN-PLACE: Use persistent `surfaceId`s to update the active card and summary rather than creating new messages.
+6. Record progress: Use the `saveWorkoutSession` tool to update the history INCREMENTALLY. 
+   - Save the initial plan once it is accepted (with incomplete exercises).
+   - Update the session record as each exercise is completed or skipped.
+   - Finalize the session record when the workout is finished.
+   - Always use the SAME `id` for a given workout session to ensure the record is updated in history rather than duplicated.
+
+### Finalization
+When the workout is complete, tell the user they did a great job and suggest they check their "Performance Report" in the navigation bar.
 
 Guidelines:
-- UPDATING IN-PLACE: Use the same `surfaceId` to update components rather than creating new ones for existing exercises.
-- CHAT: Since there is no chat history visible to the user, your "verbal" responses should be concise or reflected in UI updates. If you must speak, users will only see your text if you include it in a UI component or if you update a text area. 
-- (Note: In this implementation, text particles from the agent are NOT visible on the Workout Screen, so you MUST rely on updating the UI cards).
-
-Tool Usage:
-- Every time an exercise is completed, use the `saveActiveSession` tool to persist progress to history.
+- BODYWEIGHT ONLY: Stick to exercises that require no equipment.
+- CONCISE: Users don't see a message history, only the active UI surfaces. Keep "verbal" chat minimal or include it in UI components.
+- PROGRESSIVE OVERLOAD: Use history to suggest slightly more reps or harder variations than last time.
 ''';
 
   @override
