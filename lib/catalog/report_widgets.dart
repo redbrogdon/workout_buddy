@@ -31,7 +31,9 @@ final summaryCard = CatalogItem(
   name: 'SummaryCard',
   dataSchema: summaryCardSchema,
   widgetBuilder: (itemContext) {
-    final data = SummaryCardData.fromJson(itemContext.data as Map<String, Object?>);
+    final data = SummaryCardData.fromJson(
+      itemContext.data as Map<String, Object?>,
+    );
     return SummaryCard(data: data);
   },
 );
@@ -94,7 +96,9 @@ class BarChartData {
       title: json['title'] as String,
       description: json['description'] as String?,
       labels: (json['labels'] as List? ?? []).cast<String>(),
-      values: (json['values'] as List? ?? []).map((e) => (e as num).toDouble()).toList(),
+      values: (json['values'] as List? ?? [])
+          .map((e) => (e as num).toDouble())
+          .toList(),
     );
   }
 }
@@ -103,7 +107,9 @@ final barChart = CatalogItem(
   name: 'BarChart',
   dataSchema: barChartSchema,
   widgetBuilder: (itemContext) {
-    final data = BarChartData.fromJson(itemContext.data as Map<String, Object?>);
+    final data = BarChartData.fromJson(
+      itemContext.data as Map<String, Object?>,
+    );
     return BarChart(data: data);
   },
 );
@@ -115,7 +121,9 @@ class BarChart extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final maxValue = data.values.isEmpty ? 1.0 : data.values.reduce((a, b) => a > b ? a : b);
+    final maxValue = data.values.isEmpty
+        ? 1.0
+        : data.values.reduce((a, b) => a > b ? a : b);
 
     return Card(
       margin: const EdgeInsets.all(16),
@@ -138,19 +146,24 @@ class BarChart extends StatelessWidget {
                 children: List.generate(data.labels.length, (index) {
                   final value = data.values[index];
                   final heightFactor = maxValue > 0 ? value / maxValue : 0.0;
-                  
+
                   return Expanded(
                     child: Column(
                       mainAxisAlignment: MainAxisAlignment.end,
                       children: [
-                        Text(value.toStringAsFixed(0), style: const TextStyle(fontSize: 10)),
+                        Text(
+                          value.toStringAsFixed(0),
+                          style: const TextStyle(fontSize: 10),
+                        ),
                         const SizedBox(height: 4),
                         Flexible(
                           child: Container(
                             margin: const EdgeInsets.symmetric(horizontal: 4),
                             decoration: BoxDecoration(
                               color: theme.colorScheme.primary,
-                              borderRadius: const BorderRadius.vertical(top: Radius.circular(4)),
+                              borderRadius: const BorderRadius.vertical(
+                                top: Radius.circular(4),
+                              ),
                             ),
                             height: 150 * heightFactor,
                           ),

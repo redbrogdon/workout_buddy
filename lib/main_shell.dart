@@ -60,7 +60,7 @@ class _MainShellState extends ConsumerState<MainShell> {
       body: PageView(
         controller: _pageController,
         onPageChanged: (index) =>
-            ref.read(navigationIndexProvider.notifier).state = index,
+            ref.read(navigationIndexProvider.notifier).setIndex(index),
         children: _screens,
       ),
       bottomNavigationBar: BottomNavigationBar(
@@ -80,7 +80,7 @@ class _MainShellState extends ConsumerState<MainShell> {
         ],
         currentIndex: selectedIndex,
         onTap: (index) {
-          ref.read(navigationIndexProvider.notifier).state = index;
+          ref.read(navigationIndexProvider.notifier).setIndex(index);
           _pageController.animateToPage(
             index,
             duration: const Duration(milliseconds: 400),

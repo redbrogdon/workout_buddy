@@ -3,10 +3,13 @@
 // found in the LICENSE file.
 
 import 'package:firebase_core/firebase_core.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:genui/genui.dart';
+import 'package:file/local.dart';
 import 'package:path_provider/path_provider.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 import 'firebase_options.dart';
 import 'main_shell.dart';
@@ -22,8 +25,18 @@ void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
 
-  final docsDir = await getApplicationDocumentsDirectory();
-  final storageService = StorageService(basePath: docsDir.path);
+  StorageService storageService;
+
+  if (kIsWeb) {
+    final prefs = await SharedPreferences.getInstance();
+    storageService = SharedPreferencesStorageService(prefs);
+  } else {
+    final docsDir = await getApplicationDocumentsDirectory();
+    storageService = FileStorageService(
+      fs: const LocalFileSystem(),
+      basePath: docsDir.path,
+    );
+  }
 
   runApp(
     ProviderScope(

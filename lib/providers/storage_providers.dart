@@ -6,11 +6,16 @@ import '../models/user_preferences.dart';
 /// The base storage service provider.
 /// Should be overridden in [ProviderScope] during app initialization.
 final storageServiceProvider = Provider<StorageService>((ref) {
-  throw UnimplementedError('storageServiceProvider must be overridden in main()');
+  throw UnimplementedError(
+    'storageServiceProvider must be overridden in main()',
+  );
 });
 
 /// Tracks the active workout session, if any.
-final activeSessionProvider = NotifierProvider<ActiveSessionNotifier, WorkoutSessionRecord?>(ActiveSessionNotifier.new);
+final activeSessionProvider =
+    NotifierProvider<ActiveSessionNotifier, WorkoutSessionRecord?>(
+      ActiveSessionNotifier.new,
+    );
 
 class ActiveSessionNotifier extends Notifier<WorkoutSessionRecord?> {
   StorageService get _storage => ref.read(storageServiceProvider);
@@ -38,7 +43,10 @@ class ActiveSessionNotifier extends Notifier<WorkoutSessionRecord?> {
 }
 
 /// Tracks the entire workout history.
-final historyProvider = NotifierProvider<HistoryNotifier, List<WorkoutSessionRecord>>(HistoryNotifier.new);
+final historyProvider =
+    NotifierProvider<HistoryNotifier, List<WorkoutSessionRecord>>(
+      HistoryNotifier.new,
+    );
 
 class HistoryNotifier extends Notifier<List<WorkoutSessionRecord>> {
   StorageService get _storage => ref.read(storageServiceProvider);
@@ -59,7 +67,10 @@ class HistoryNotifier extends Notifier<List<WorkoutSessionRecord>> {
 }
 
 /// Tracks user preferences.
-final preferencesProvider = NotifierProvider<PreferencesNotifier, UserPreferences>(PreferencesNotifier.new);
+final preferencesProvider =
+    NotifierProvider<PreferencesNotifier, UserPreferences>(
+      PreferencesNotifier.new,
+    );
 
 class PreferencesNotifier extends Notifier<UserPreferences> {
   StorageService get _storage => ref.read(storageServiceProvider);

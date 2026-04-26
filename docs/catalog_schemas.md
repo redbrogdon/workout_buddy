@@ -13,7 +13,9 @@ Displays the overall draft workout plan.
 *   **Role:** High-level summary of the session.
 *   **Fields:**
     - `title` (string): The title of the workout session.
-    - `exercises` (list of strings): A list of 3-5 exercise names/descriptions to perform.
+    - `description` (optional string): A brief overview or motivation for the workout.
+    - `exercises` (list of strings): A list of exercise names planned for the session.
+    - `onStart` (optional action): Dispatched when the user chooses to begin the workout.
 
 ### ExerciseTile
 An interactive tile for individual exercises during negotiation.

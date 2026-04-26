@@ -1,10 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:genui/genui.dart' hide TextPart;
-import 'package:genui/genui.dart' as genui;
-import 'package:firebase_ai/firebase_ai.dart';
+import '../services/agent_service.dart';
 import '../catalog/catalog.dart';
-import '../tools/storage_tools.dart';
 
 class WorkoutScreen extends ConsumerStatefulWidget {
   const WorkoutScreen({super.key});
@@ -14,8 +12,7 @@ class WorkoutScreen extends ConsumerStatefulWidget {
 }
 
 class _WorkoutScreenState extends ConsumerState<WorkoutScreen> {
-  late final GenerativeModel model;
-  late final ChatSession _chatSession;
+  late final AgentService _agent;
   late final SurfaceController _controller;
   late final A2uiTransportAdapter _transport;
   late final Conversation _conversation;
@@ -27,15 +24,10 @@ class _WorkoutScreenState extends ConsumerState<WorkoutScreen> {
   @override
   void initState() {
     super.initState();
-    final tools = ref.read(storageToolsProvider);
-    model = FirebaseAI.googleAI().generativeModel(
-      model: 'gemini-3-flash-preview',
-      tools: tools,
-    );
-    _chatSession = model.startChat();
-    
+    _agent = ref.read(agentServiceProvider('workout'));
+
     _controller = SurfaceController(catalogs: [workoutBuddyCatalog]);
-    _transport = A2uiTransportAdapter(onSend: _sendAndReceive);
+    _transport = A2uiTransportAdapter(onSend: _handleSend);
     _conversation = Conversation(
       controller: _controller,
       transport: _transport,
@@ -71,21 +63,10 @@ class _WorkoutScreenState extends ConsumerState<WorkoutScreen> {
     );
   }
 
-  Future<void> _sendAndReceive(ChatMessage msg) async {
-    final buffer = StringBuffer();
-    for (final part in msg.parts) {
-      if (part.isUiInteractionPart) {
-        buffer.write(part.asUiInteractionPart!.interaction);
-      } else if (part is genui.TextPart) {
-        buffer.write(part.text);
-      }
-    }
-
-    if (buffer.isEmpty) return;
-
-    final response = await _chatSession.sendMessage(Content.text(buffer.toString()));
-    if (response.text != null && mounted) {
-      _transport.addChunk(response.text!);
+  Future<void> _handleSend(ChatMessage msg) async {
+    final response = await _agent.sendMessage(msg);
+    if (response != null && mounted) {
+      _transport.addChunk(response);
     }
   }
 
@@ -105,7 +86,7 @@ class _WorkoutScreenState extends ConsumerState<WorkoutScreen> {
       children: [
         if (hasSummary)
           Surface(surfaceContext: _controller.contextFor('summary')),
-        
+
         ValueListenableBuilder<ConversationState>(
           valueListenable: _conversation.state,
           builder: (context, state, child) {
@@ -113,7 +94,7 @@ class _WorkoutScreenState extends ConsumerState<WorkoutScreen> {
             return const SizedBox.shrink();
           },
         ),
-        
+
         Expanded(
           child: ListView.builder(
             controller: _scrollController,
@@ -127,7 +108,7 @@ class _WorkoutScreenState extends ConsumerState<WorkoutScreen> {
             },
           ),
         ),
-        
+
         // Chat input bar (no message history displayed)
         Padding(
           padding: const EdgeInsets.all(16.0),

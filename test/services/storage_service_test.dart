@@ -12,7 +12,7 @@ void main() {
   setUp(() {
     fs = MemoryFileSystem();
     fs.directory(basePath).createSync(recursive: true);
-    storageService = StorageService(fs: fs, basePath: basePath);
+    storageService = FileStorageService(fs: fs, basePath: basePath);
   });
 
   group('StorageService - Active Session', () {
@@ -68,6 +68,22 @@ void main() {
     test('Should return empty preferences if file missing', () async {
       final recovered = await storageService.readPreferences();
       expect(recovered.description, '');
+    });
+
+    test('Should return default prefs on corrupted JSON', () async {
+      final file = fs.file('$basePath/user_preferences.json');
+      await file.writeAsString('["not a map"]');
+      final prefs = await storageService.readPreferences();
+      expect(prefs.description, isEmpty);
+    });
+  });
+
+  group('StorageService - Corruption Resilience', () {
+    test('Should return empty history on corrupted JSON', () async {
+      final file = fs.file('$basePath/workout_history.json');
+      await file.writeAsString('{ invalid json }');
+      final history = await storageService.readHistory();
+      expect(history, isEmpty);
     });
   });
 }

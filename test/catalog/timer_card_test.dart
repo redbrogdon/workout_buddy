@@ -17,14 +17,16 @@ void main() {
     });
 
     testWidgets('Displays initial data correctly', (WidgetTester tester) async {
-      await tester.pumpWidget(MaterialApp(
-        home: Scaffold(
-          body: TimerCard(
-            data: testData,
-            onCompleted: (_) {},
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            body: TimerCard(
+              data: testData,
+              onCompleted: (_) {},
+            ),
           ),
         ),
-      ));
+      );
 
       expect(find.text('Plank'), findsOneWidget);
       expect(find.text('Stay flat.'), findsOneWidget);
@@ -32,15 +34,19 @@ void main() {
       expect(find.text('0s'), findsOneWidget);
     });
 
-    testWidgets('Timer increments when play is pressed', (WidgetTester tester) async {
-      await tester.pumpWidget(MaterialApp(
-        home: Scaffold(
-          body: TimerCard(
-            data: testData,
-            onCompleted: (_) {},
+    testWidgets('Timer increments when play is pressed', (
+      WidgetTester tester,
+    ) async {
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            body: TimerCard(
+              data: testData,
+              onCompleted: (_) {},
+            ),
           ),
         ),
-      ));
+      );
 
       // Press Play
       await tester.tap(find.byKey(const ValueKey('toggle_timer')));
@@ -61,14 +67,16 @@ void main() {
     });
 
     testWidgets('Reset button clears duration', (WidgetTester tester) async {
-      await tester.pumpWidget(MaterialApp(
-        home: Scaffold(
-          body: TimerCard(
-            data: testData,
-            onCompleted: (_) {},
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            body: TimerCard(
+              data: testData,
+              onCompleted: (_) {},
+            ),
           ),
         ),
-      ));
+      );
 
       // Press Play and wait
       await tester.tap(find.byKey(const ValueKey('toggle_timer')));
@@ -82,17 +90,21 @@ void main() {
       expect(find.text('0s'), findsOneWidget);
     });
 
-    testWidgets('Complete button calls onCompleted with actual duration', (WidgetTester tester) async {
+    testWidgets('Complete button calls onCompleted with actual duration', (
+      WidgetTester tester,
+    ) async {
       int? capturedDuration;
 
-      await tester.pumpWidget(MaterialApp(
-        home: Scaffold(
-          body: TimerCard(
-            data: testData,
-            onCompleted: (duration) => capturedDuration = duration,
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            body: TimerCard(
+              data: testData,
+              onCompleted: (duration) => capturedDuration = duration,
+            ),
           ),
         ),
-      ));
+      );
 
       // Run timer for 10 seconds
       await tester.tap(find.byKey(const ValueKey('toggle_timer')));

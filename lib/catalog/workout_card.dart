@@ -16,7 +16,9 @@ final workoutCardSchema = S.object(
         maxLength: 5,
       ),
     ),
-    'onStart': A2uiSchemas.action(description: 'Action to trigger when starting the workout'),
+    'onStart': A2uiSchemas.action(
+      description: 'Action to trigger when starting the workout',
+    ),
   },
   required: ['title', 'exercises'],
 );
@@ -54,12 +56,15 @@ final workoutCard = CatalogItem(
               final eventJson = onStart as Map<String, dynamic>;
               if (eventJson.containsKey('event')) {
                 final eventData = eventJson['event'] as Map<String, dynamic>;
-                itemContext.dispatchEvent(UserActionEvent(
-                  name: eventData['name'] as String,
-                  context: (eventData['context'] as Map?)?.cast<String, dynamic>(),
-                  sourceComponentId: itemContext.id,
-                  surfaceId: itemContext.surfaceId,
-                ));
+                itemContext.dispatchEvent(
+                  UserActionEvent(
+                    name: eventData['name'] as String,
+                    context: (eventData['context'] as Map?)
+                        ?.cast<String, dynamic>(),
+                    sourceComponentId: itemContext.id,
+                    surfaceId: itemContext.surfaceId,
+                  ),
+                );
               }
             }
           : null,
@@ -114,7 +119,10 @@ class WorkoutCard extends StatelessWidget {
           ),
           if (onStart != null)
             Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
+              padding: const EdgeInsets.symmetric(
+                horizontal: 16.0,
+                vertical: 8.0,
+              ),
               child: FilledButton.icon(
                 onPressed: onStart,
                 icon: const Icon(Icons.play_arrow),

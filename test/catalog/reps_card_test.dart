@@ -16,60 +16,91 @@ void main() {
     });
 
     testWidgets('Displays initial data correctly', (WidgetTester tester) async {
-      await tester.pumpWidget(MaterialApp(
-        home: Scaffold(
-          body: RepsCard(
-            data: testData,
-            onCompleted: (_) {},
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            body: RepsCard(
+              data: testData,
+              onCompleted: (_) {},
+            ),
           ),
         ),
-      ));
+      );
 
       expect(find.text('Pushups'), findsOneWidget);
       expect(find.byKey(const ValueKey('target_reps')), findsOneWidget);
       expect(find.byKey(const ValueKey('reps_completed_text')), findsOneWidget);
-      expect(tester.widget<Text>(find.byKey(const ValueKey('target_reps'))).data, '10');
-      expect(tester.widget<Text>(find.byKey(const ValueKey('reps_completed_text'))).data, '10');
+      expect(
+        tester.widget<Text>(find.byKey(const ValueKey('target_reps'))).data,
+        '10',
+      );
+      expect(
+        tester
+            .widget<Text>(find.byKey(const ValueKey('reps_completed_text')))
+            .data,
+        '10',
+      );
     });
 
     testWidgets('Increments and decrements reps', (WidgetTester tester) async {
-      await tester.pumpWidget(MaterialApp(
-        home: Scaffold(
-          body: RepsCard(
-            data: testData,
-            onCompleted: (_) {},
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            body: RepsCard(
+              data: testData,
+              onCompleted: (_) {},
+            ),
           ),
         ),
-      ));
+      );
 
       // Initial state is 10
       expect(find.byKey(const ValueKey('reps_completed_text')), findsOneWidget);
-      expect(tester.widget<Text>(find.byKey(const ValueKey('reps_completed_text'))).data, '10');
+      expect(
+        tester
+            .widget<Text>(find.byKey(const ValueKey('reps_completed_text')))
+            .data,
+        '10',
+      );
 
       // Increment
       await tester.tap(find.byKey(const ValueKey('increment_reps')));
       await tester.pump();
-      expect(tester.widget<Text>(find.byKey(const ValueKey('reps_completed_text'))).data, '11');
+      expect(
+        tester
+            .widget<Text>(find.byKey(const ValueKey('reps_completed_text')))
+            .data,
+        '11',
+      );
 
       // Decrement twice
       await tester.tap(find.byKey(const ValueKey('decrement_reps')));
       await tester.pump();
       await tester.tap(find.byKey(const ValueKey('decrement_reps')));
       await tester.pump();
-      expect(tester.widget<Text>(find.byKey(const ValueKey('reps_completed_text'))).data, '9');
+      expect(
+        tester
+            .widget<Text>(find.byKey(const ValueKey('reps_completed_text')))
+            .data,
+        '9',
+      );
     });
 
-    testWidgets('Complete button dispatches actual reps', (WidgetTester tester) async {
+    testWidgets('Complete button dispatches actual reps', (
+      WidgetTester tester,
+    ) async {
       int? capturedReps;
 
-      await tester.pumpWidget(MaterialApp(
-        home: Scaffold(
-          body: RepsCard(
-            data: testData,
-            onCompleted: (reps) => capturedReps = reps,
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            body: RepsCard(
+              data: testData,
+              onCompleted: (reps) => capturedReps = reps,
+            ),
           ),
         ),
-      ));
+      );
 
       // Change reps to 15
       for (int i = 0; i < 5; i++) {
@@ -84,32 +115,43 @@ void main() {
       expect(capturedReps, 15);
     });
     group('Edge Cases', () {
-    testWidgets('Buttons are disabled when isCompleted is true', (WidgetTester tester) async {
-      final completedData = RepsCardData(
-        exercise: 'Pushups',
-        instructions: 'Done.',
-        numberOfReps: 10,
-        isCompleted: true,
-      );
+      testWidgets('Buttons are disabled when isCompleted is true', (
+        WidgetTester tester,
+      ) async {
+        final completedData = RepsCardData(
+          exercise: 'Pushups',
+          instructions: 'Done.',
+          numberOfReps: 10,
+          isCompleted: true,
+        );
 
-      await tester.pumpWidget(MaterialApp(
-        home: Scaffold(
-          body: RepsCard(
-            data: completedData,
-            onCompleted: (_) {},
+        await tester.pumpWidget(
+          MaterialApp(
+            home: Scaffold(
+              body: RepsCard(
+                data: completedData,
+                onCompleted: (_) {},
+              ),
+            ),
           ),
-        ),
-      ));
+        );
 
-      // Attempt to tap increment
-      await tester.tap(find.byKey(const ValueKey('increment_reps')));
-      await tester.pump();
-      expect(tester.widget<Text>(find.byKey(const ValueKey('reps_completed_text'))).data, '10');
+        // Attempt to tap increment
+        await tester.tap(find.byKey(const ValueKey('increment_reps')));
+        await tester.pump();
+        expect(
+          tester
+              .widget<Text>(find.byKey(const ValueKey('reps_completed_text')))
+              .data,
+          '10',
+        );
 
-      // Check if IconButton onPressed is null (disabled)
-      final incrementButton = tester.widget<IconButton>(find.byKey(const ValueKey('increment_reps')));
-      expect(incrementButton.onPressed, isNull);
+        // Check if IconButton onPressed is null (disabled)
+        final incrementButton = tester.widget<IconButton>(
+          find.byKey(const ValueKey('increment_reps')),
+        );
+        expect(incrementButton.onPressed, isNull);
+      });
     });
-  });
   });
 }

@@ -19,16 +19,26 @@ All of these should be driven by the agent, with the agent responsible for maint
 ## The Agent
 Each of the app's three screens uses a separate instance of the agent (Gemini 3 Flash Preview) with its own state and instructions.
 
-*   **Default Model:** `gemini-3-flash-preview`
-*   **Prompting Strategy:** System instructions are built using `PromptBuilder`'s `systemPromptFragments` for modularity and sent via `ChatMessage.system(promptBuilder.systemPromptJoined())`.
+### Agent Service Abstraction
+The application uses an **Agent Service Abstraction Layer** to decouple the UI from the underlying AI platform (Firebase AI / Gemini SDK).
 
-## State Management & Navigation
-The application uses a **Shared State via Local Storage** pattern to manage transitions between screens:
+*   **Preferred Model:** `gemini-3-flash-preview`
+*   **Interface:** `AgentService` (defined in `lib/services/agent_service.dart`) provides a generic `sendMessage(ChatMessage message)` API.
+*   **Decoupling:** The `AgentService` public API is built on the `genai_primitives` package and contains **no dependencies on GenUI**. It handles raw message processing and model coordination.
+*   **Implementation:** `FirebaseAgentService` implements the interface using the `firebase_ai` package.
+*   **Scoped Providers:** The `agentServiceProvider` is a family provider that generates scoped instances for the 'plan', 'workout', and 'report' purposes, injecting specific tools into each.
 
-*   **Plan to Workout:** When a workout plan is accepted and "Start Workout" is triggered, the Plan Screen Agent (or client code) saves the finalized plan to a "Current Session" slot in local storage. The application then navigates to the Workout screen.
-*   **Workout to Report:** As the user completes exercises, the Workout Screen Agent updates the "Current Session" record with actual performance data. Upon completion, the session is moved from "Current" to "History," and the user is prompted to view the Report screen.
+### Interaction Workflow
+1.  **Screen-Managed Transport:** Screens own the `A2uiTransportAdapter` and `Conversation` objects.
+2.  **Message Flow:** When a user sends a message, the screen calls `_agent.sendMessage(msg)`.
+3.  **UI Updates:** The screen receives a string response from the agent and manually pipes it into the transport via `_transport.addChunk(response)`.
+4.  **Handoffs:**
+    *   **Plan to Workout:** When a workout plan is accepted, the `WorkoutCard` dispatches a `start_workout` event. The `PlanScreen` intercepts this event, saves the plan to `active_session.json`, and updates the global `navigationIndexProvider` to transition the app shell to the Workout screen.
+    *   **Workout to Report:** Upon selecting "Finish Workout", the Workout Agent saves the completed session to `workout_history.json` and prompts the user to navigate to the Report screen via the bottom bar.
 
-By using local storage as the bridge, each screen's agent can remain focused on its specific task while remaining aware of the broader session context.
+### Global State Providers
+- `navigationIndexProvider`: A `StateProvider<int>` that governs the active tab in the `MainShell`.
+- `storageServiceProvider`: Provides the persistence layer to all custom agent tools.
 
 ## Storage Implementation
 
@@ -70,7 +80,12 @@ An exercise is composed of:
 * A number of repetitions or an amount of time for which to perform the exercise (e.g. reps for push-ups or seconds for planks)
 
 ## Testing
-The app should be constructed in such a way that it is easy to test. Each screen should be testable in isolation, and the agents should be testable in isolation.
+The app is designed for high testability by decoupling UI, Service, and Storage layers.
+
+### Isolation Strategy
+*   **Storage Layer:** Each custom tool interacts with an abstract `StorageService`, which is mocked in widget tests using a `MockStorageService`.
+*   **Agent Layer:** Screens are tested by overriding the `agentServiceProvider` with a `MockAgentService`. This allows verifying UI rendering and navigation without firing real LLM requests or requiring Firebase initialization.
+*   **Component Testing:** Individual GenUI catalog items can be verified in isolation by pumping them into a `Surface` widget.
 
 ## The UI
 The app is composed of three screens, and the user can switch between them using a navigation bar at the bottom of the screen. The navigation bar should always be visible, with UI components from the agent appearing above. 
@@ -79,11 +94,15 @@ The Plan screen should be the default screen when the app is launched.
 
 Unless otherwise specified, the main content region of the screen (above the navigation bar) should scroll vertically to allow for more content that can be viewed at one time.
 
-*   **Workout Screen Exception:** On the Workout screen, the `SessionSummary` component is pinned to the top, while the exercise cards are scrollable beneath it. Additionally, chronological chat bubbles are suppressed to keep the focus on the active exercise cards.
+### The "In-Place" UI Pattern
+To avoid the cognitive load of a growing chat history, the application leverages persistent `surfaceId`s for core UI components:
+*   **Workout Screen:** The `SessionSummary` and active `ExerciseTile`s use stable IDs. The agent updates these existing surfaces in-place rather than sending new messages.
+*   **Chat Minimization:** In tracking-heavy screens (like Workout), chronological chat bubbles are suppressed to keep the focus on the active tracking cards.
 
 ### Visual Design
-The application follows a "lean and native" design philosophy:
-*   **Framework:** Use standard **Material 3** widgets and patterns.
-*   **Theming:** Support both **Light and Dark modes**, honoring the user's system-level preference.
-*   **Typography:** Use the device's **default system fonts** to maintain a clean, efficient feel.
-*   **Color Palette:** Use the default Material 3 color schemes for a familiar, welcoming experience (the "Planet Fitness" vibe).
+The application follows a premium, branded design philosophy:
+*   **Theme:** A custom `ThemeData` inspired by the **Planet Fitness** aesthetic.
+    - **Colors:** Deep Purple (`#6D2077`) for primary actions and Yellow (`#FEB822`) for highlights.
+    - **Mode:** Primarily utilizes a high-contrast dark theme for a focused "gym" feel.
+*   **Typography:** Custom typography system using bold headlines for clarity and refined body text for readability.
+*   **Transitions:** Fluid sliding transitions between screens implemented via `PageView` and `PageController`.

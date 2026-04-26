@@ -3,10 +3,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:genui/genui.dart' hide TextPart;
 import 'package:genui/genui.dart' as genui;
-import 'package:firebase_ai/firebase_ai.dart';
 import '../catalog/catalog.dart';
-import '../tools/storage_tools.dart';
 import '../providers/navigation_providers.dart';
+import '../services/agent_service.dart';
 
 class PlanScreen extends ConsumerStatefulWidget {
   const PlanScreen({super.key});
@@ -16,8 +15,7 @@ class PlanScreen extends ConsumerStatefulWidget {
 }
 
 class _PlanScreenState extends ConsumerState<PlanScreen> {
-  late final GenerativeModel model;
-  late final ChatSession _chatSession;
+  late final AgentService _agent;
   late final SurfaceController _controller;
   late final A2uiTransportAdapter _transport;
   late final Conversation _conversation;
@@ -29,15 +27,10 @@ class _PlanScreenState extends ConsumerState<PlanScreen> {
   @override
   void initState() {
     super.initState();
-    final tools = ref.read(storageToolsProvider);
-    model = FirebaseAI.googleAI().generativeModel(
-      model: 'gemini-3-flash-preview',
-      tools: tools,
-    );
-    _chatSession = model.startChat();
+    _agent = ref.read(agentServiceProvider('plan'));
 
     _controller = SurfaceController(catalogs: [workoutBuddyCatalog]);
-    _transport = A2uiTransportAdapter(onSend: _sendAndReceive);
+    _transport = A2uiTransportAdapter(onSend: _handleSend);
     _conversation = Conversation(
       controller: _controller,
       transport: _transport,
@@ -71,32 +64,24 @@ class _PlanScreenState extends ConsumerState<PlanScreen> {
     );
   }
 
-  Future<void> _sendAndReceive(ChatMessage msg) async {
-    final buffer = StringBuffer();
+  Future<void> _handleSend(ChatMessage msg) async {
+    // Client-side intercept for navigation events
     for (final part in msg.parts) {
       if (part.isUiInteractionPart) {
         final interaction = part.asUiInteractionPart!.interaction;
-        buffer.write(interaction);
-        
-        // Handle client-side navigation on start_workout
         try {
           final json = jsonDecode(interaction) as Map<String, dynamic>;
           if (json['name'] == 'start_workout') {
-             ref.read(navigationIndexProvider.notifier).state = 1;
+            ref.read(navigationIndexProvider.notifier).setIndex(1);
           }
         } catch (_) {}
-      } else if (part is genui.TextPart) {
-        buffer.write(part.text);
       }
     }
 
-    if (buffer.isEmpty) return;
-
-    final response = await _chatSession.sendMessage(
-      Content.text(buffer.toString()),
-    );
-    if (response.text != null && mounted) {
-      _transport.addChunk(response.text!);
+    // Hand off to abstract agent service
+    final response = await _agent.sendMessage(msg);
+    if (response != null && mounted) {
+      _transport.addChunk(response);
     }
   }
 
