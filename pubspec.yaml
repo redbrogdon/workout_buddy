@@ -15,6 +15,10 @@ dependencies:
   firebase_ai: ^3.8.0
   cupertino_icons: ^1.0.8
   genui: ^0.8.0
+  path: ^1.9.1
+  flutter_riverpod: ^3.3.1
+  path_provider: ^2.1.5
+  file: ^7.0.1
 
 dev_dependencies:
   flutter_test:

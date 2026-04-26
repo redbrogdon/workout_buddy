@@ -20,20 +20,20 @@ final workoutCardSchema = S.object(
   required: ['title', 'exercises'],
 );
 
-class _WorkoutCardData {
+class WorkoutCardData {
   final String title;
   final List<String> exercises;
 
-  _WorkoutCardData({required this.title, required this.exercises});
+  WorkoutCardData({required this.title, required this.exercises});
 
-  factory _WorkoutCardData.fromJson(Map<String, Object?> json) {
+  factory WorkoutCardData.fromJson(Map<String, Object?> json) {
     try {
-      return _WorkoutCardData(
+      return WorkoutCardData(
         title: json['title'] as String,
         exercises: List<String>.from(json['exercises'] as List),
       );
     } catch (_) {
-      throw Exception('Invalid JSON for _WorkoutCardData');
+      throw Exception('Invalid JSON for WorkoutCardData');
     }
   }
 }
@@ -43,16 +43,16 @@ final workoutCard = CatalogItem(
   dataSchema: workoutCardSchema,
   widgetBuilder: (itemContext) {
     final json = itemContext.data as Map<String, dynamic>;
-    final data = _WorkoutCardData.fromJson(json);
+    final data = WorkoutCardData.fromJson(json);
 
-    return _WorkoutCard(data: data);
+    return WorkoutCard(data: data);
   },
 );
 
-class _WorkoutCard extends StatelessWidget {
-  final _WorkoutCardData data;
+class WorkoutCard extends StatelessWidget {
+  final WorkoutCardData data;
 
-  const _WorkoutCard({required this.data});
+  const WorkoutCard({super.key, required this.data});
 
   @override
   Widget build(BuildContext context) {
@@ -68,6 +68,7 @@ class _WorkoutCard extends StatelessWidget {
             padding: const EdgeInsets.all(16.0),
             child: Text(
               data.title,
+              key: const ValueKey('workout_title'),
               style: theme.textTheme.headlineSmall?.copyWith(
                 fontWeight: FontWeight.bold,
                 fontStyle: FontStyle.italic,
@@ -78,11 +79,13 @@ class _WorkoutCard extends StatelessWidget {
           Padding(
             padding: const EdgeInsets.all(16.0),
             child: Wrap(
+              key: const ValueKey('exercise_wrap'),
               spacing: 8.0,
               runSpacing: 8.0,
               children: data.exercises
                   .map(
                     (exercise) => Chip(
+                      key: ValueKey('exercise_chip_$exercise'),
                       avatar: const Icon(Icons.fitness_center),
                       label: Text(exercise),
                     ),

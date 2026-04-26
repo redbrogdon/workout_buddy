@@ -38,7 +38,7 @@ final repsCardSchema = S.object(
   ],
 );
 
-class _RepsCardData {
+class RepsCardData {
   final String exercise;
   final String instructions;
   final int numberOfReps;
@@ -46,7 +46,7 @@ class _RepsCardData {
   final bool isCompleted;
   final JsonMap? completeAction;
 
-  _RepsCardData({
+  RepsCardData({
     required this.exercise,
     required this.instructions,
     required this.numberOfReps,
@@ -55,9 +55,9 @@ class _RepsCardData {
     this.completeAction,
   });
 
-  factory _RepsCardData.fromJson(Map<String, Object?> json) {
+  factory RepsCardData.fromJson(Map<String, Object?> json) {
     try {
-      return _RepsCardData(
+      return RepsCardData(
         exercise: json['exercise'] as String,
         instructions: json['instructions'] as String,
         numberOfReps: json['numberOfReps'] as int,
@@ -66,7 +66,7 @@ class _RepsCardData {
         completeAction: json['completeAction'] as JsonMap?,
       );
     } catch (_) {
-      throw Exception('Invalid JSON for _RepsCardData');
+      throw Exception('Invalid JSON for RepsCardData');
     }
   }
 }
@@ -76,9 +76,9 @@ final repsCard = CatalogItem(
   dataSchema: repsCardSchema,
   widgetBuilder: (itemContext) {
     final json = itemContext.data as Map<String, Object?>;
-    final data = _RepsCardData.fromJson(json);
+    final data = RepsCardData.fromJson(json);
 
-    return _RepsCard(
+    return RepsCard(
       data: data,
       onCompleted: (reps) async {
         final action = data.completeAction;
@@ -106,20 +106,21 @@ final repsCard = CatalogItem(
   },
 );
 
-class _RepsCard extends StatefulWidget {
-  final _RepsCardData data;
+class RepsCard extends StatefulWidget {
+  final RepsCardData data;
   final void Function(int) onCompleted;
 
-  const _RepsCard({
+  const RepsCard({
+    super.key,
     required this.data,
     required this.onCompleted,
   });
 
   @override
-  State<_RepsCard> createState() => _RepsCardState();
+  State<RepsCard> createState() => _RepsCardState();
 }
 
-class _RepsCardState extends State<_RepsCard> {
+class _RepsCardState extends State<RepsCard> {
   late int repsCompleted;
 
   @override
@@ -129,7 +130,7 @@ class _RepsCardState extends State<_RepsCard> {
   }
 
   @override
-  void didUpdateWidget(_RepsCard oldWidget) {
+  void didUpdateWidget(RepsCard oldWidget) {
     super.didUpdateWidget(oldWidget);
 
     if (oldWidget.data.exercise != widget.data.exercise) {
@@ -151,6 +152,7 @@ class _RepsCardState extends State<_RepsCard> {
             padding: const EdgeInsets.all(16.0),
             child: Text(
               widget.data.exercise,
+              key: const ValueKey('exercise_name'),
               style: theme.textTheme.headlineSmall?.copyWith(
                 fontWeight: FontWeight.bold,
               ),
@@ -160,6 +162,7 @@ class _RepsCardState extends State<_RepsCard> {
             padding: const EdgeInsets.all(16.0),
             child: Text(
               '${widget.data.numberOfReps}',
+              key: const ValueKey('target_reps'),
               style: theme.textTheme.headlineSmall,
             ),
           ),
@@ -170,20 +173,26 @@ class _RepsCardState extends State<_RepsCard> {
               spacing: 8,
               children: [
                 const Text('Reps completed:'),
-                Text('$repsCompleted'),
+                Text(
+                  '$repsCompleted',
+                  key: const ValueKey('reps_completed_text'),
+                ),
                 IconButton(
+                  key: const ValueKey('increment_reps'),
                   icon: const Icon(Icons.arrow_upward),
                   onPressed: widget.data.isCompleted
                       ? null
                       : () => setState(() => repsCompleted++),
                 ),
                 IconButton(
+                  key: const ValueKey('decrement_reps'),
                   icon: const Icon(Icons.arrow_downward),
                   onPressed: widget.data.isCompleted
                       ? null
                       : () => setState(() => repsCompleted--),
                 ),
                 IconButton(
+                  key: const ValueKey('complete_button'),
                   icon: const Icon(Icons.check),
                   onPressed: widget.data.isCompleted
                       ? null

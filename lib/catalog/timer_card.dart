@@ -40,7 +40,7 @@ final timerCardSchema = S.object(
   ],
 );
 
-class _TimerCardData {
+class TimerCardData {
   final String exercise;
   final String instructions;
   final int suggestedDuration;
@@ -48,7 +48,7 @@ class _TimerCardData {
   final bool isCompleted;
   final JsonMap? completeAction;
 
-  _TimerCardData({
+  TimerCardData({
     required this.exercise,
     required this.instructions,
     required this.suggestedDuration,
@@ -57,9 +57,9 @@ class _TimerCardData {
     this.completeAction,
   });
 
-  factory _TimerCardData.fromJson(Map<String, Object?> json) {
+  factory TimerCardData.fromJson(Map<String, Object?> json) {
     try {
-      return _TimerCardData(
+      return TimerCardData(
         exercise: json['exercise'] as String,
         instructions: json['instructions'] as String,
         suggestedDuration: json['suggestedDuration'] as int,
@@ -68,7 +68,7 @@ class _TimerCardData {
         completeAction: json['completeAction'] as JsonMap?,
       );
     } catch (_) {
-      throw Exception('Invalid JSON for _TimerCardData');
+      throw Exception('Invalid JSON for TimerCardData');
     }
   }
 }
@@ -78,9 +78,9 @@ final timerCard = CatalogItem(
   dataSchema: timerCardSchema,
   widgetBuilder: (itemContext) {
     final json = itemContext.data as Map<String, Object?>;
-    final data = _TimerCardData.fromJson(json);
+    final data = TimerCardData.fromJson(json);
 
-    return _TimerCard(
+    return TimerCard(
       data: data,
       onCompleted: (actualDuration) async {
         final action = data.completeAction;
@@ -108,20 +108,21 @@ final timerCard = CatalogItem(
   },
 );
 
-class _TimerCard extends StatefulWidget {
-  final _TimerCardData data;
+class TimerCard extends StatefulWidget {
+  final TimerCardData data;
   final void Function(int) onCompleted;
 
-  const _TimerCard({
+  const TimerCard({
+    super.key,
     required this.data,
     required this.onCompleted,
   });
 
   @override
-  State<_TimerCard> createState() => _TimerCardState();
+  State<TimerCard> createState() => _TimerCardState();
 }
 
-class _TimerCardState extends State<_TimerCard> {
+class _TimerCardState extends State<TimerCard> {
   late int actualDuration;
   Timer? _timer;
 
@@ -138,7 +139,7 @@ class _TimerCardState extends State<_TimerCard> {
   }
 
   @override
-  void didUpdateWidget(_TimerCard oldWidget) {
+  void didUpdateWidget(TimerCard oldWidget) {
     super.didUpdateWidget(oldWidget);
 
     if (oldWidget.data.exercise != widget.data.exercise) {
@@ -181,6 +182,7 @@ class _TimerCardState extends State<_TimerCard> {
             padding: const EdgeInsets.all(16.0),
             child: Text(
               widget.data.exercise,
+              key: const ValueKey('exercise_name'),
               style: theme.textTheme.headlineSmall?.copyWith(
                 fontWeight: FontWeight.bold,
               ),
@@ -190,6 +192,7 @@ class _TimerCardState extends State<_TimerCard> {
             padding: const EdgeInsets.symmetric(horizontal: 16.0),
             child: Text(
               widget.data.instructions,
+              key: const ValueKey('instructions'),
               style: theme.textTheme.bodyMedium,
             ),
           ),
@@ -197,6 +200,7 @@ class _TimerCardState extends State<_TimerCard> {
             padding: const EdgeInsets.all(16.0),
             child: Text(
               'Suggested Duration: ${widget.data.suggestedDuration}s',
+              key: const ValueKey('suggested_duration'),
               style: theme.textTheme.titleMedium,
             ),
           ),
@@ -207,8 +211,12 @@ class _TimerCardState extends State<_TimerCard> {
               spacing: 8,
               children: [
                 const Text('Actual Duration:'),
-                Text('${actualDuration}s'),
+                Text(
+                  '${actualDuration}s',
+                  key: const ValueKey('actual_duration'),
+                ),
                 IconButton(
+                  key: const ValueKey('toggle_timer'),
                   icon: Icon(
                     (_timer?.isActive ?? false)
                         ? Icons.pause
@@ -217,10 +225,12 @@ class _TimerCardState extends State<_TimerCard> {
                   onPressed: widget.data.isCompleted ? null : _toggleTimer,
                 ),
                 IconButton(
+                  key: const ValueKey('reset_timer'),
                   icon: const Icon(Icons.refresh),
                   onPressed: widget.data.isCompleted ? null : _resetTimer,
                 ),
                 IconButton(
+                  key: const ValueKey('complete_button'),
                   icon: const Icon(Icons.check),
                   onPressed: widget.data.isCompleted
                       ? null
