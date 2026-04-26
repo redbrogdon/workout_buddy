@@ -1,9 +1,12 @@
+import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:genui/genui.dart' hide TextPart;
 import 'package:genui/genui.dart' as genui;
 import 'package:firebase_ai/firebase_ai.dart';
 import '../catalog/catalog.dart';
+import '../tools/storage_tools.dart';
+import '../providers/navigation_providers.dart';
 
 class PlanScreen extends ConsumerStatefulWidget {
   const PlanScreen({super.key});
@@ -13,10 +16,7 @@ class PlanScreen extends ConsumerStatefulWidget {
 }
 
 class _PlanScreenState extends ConsumerState<PlanScreen> {
-  final model = FirebaseAI.googleAI().generativeModel(
-    model: 'gemini-3-flash-preview',
-  );
-
+  late final GenerativeModel model;
   late final ChatSession _chatSession;
   late final SurfaceController _controller;
   late final A2uiTransportAdapter _transport;
@@ -29,6 +29,11 @@ class _PlanScreenState extends ConsumerState<PlanScreen> {
   @override
   void initState() {
     super.initState();
+    final tools = ref.read(storageToolsProvider);
+    model = FirebaseAI.googleAI().generativeModel(
+      model: 'gemini-3-flash-preview',
+      tools: tools,
+    );
     _chatSession = model.startChat();
 
     _controller = SurfaceController(catalogs: [workoutBuddyCatalog]);
@@ -70,7 +75,16 @@ class _PlanScreenState extends ConsumerState<PlanScreen> {
     final buffer = StringBuffer();
     for (final part in msg.parts) {
       if (part.isUiInteractionPart) {
-        buffer.write(part.asUiInteractionPart!.interaction);
+        final interaction = part.asUiInteractionPart!.interaction;
+        buffer.write(interaction);
+        
+        // Handle client-side navigation on start_workout
+        try {
+          final json = jsonDecode(interaction) as Map<String, dynamic>;
+          if (json['name'] == 'start_workout') {
+             ref.read(navigationIndexProvider.notifier).state = 1;
+          }
+        } catch (_) {}
       } else if (part is genui.TextPart) {
         buffer.write(part.text);
       }
@@ -144,14 +158,19 @@ You are the "Workout Architect" for Workout Buddy.
 Your personality is cheerful, efficient, and supportive (Planet Fitness vibe).
 Everyone is welcome and accepted.
 
-Your goal is to help the user create a perfect 3-5 exercise bodyweight workout plan.
+Your goal is to help the user design the perfect workout session for today.
+
+Tools:
+- `readPreferences`: Use this to understand the user's general goals and workout style.
+- `readHistory`: Use this to see what they've done recently and suggest progressive overload.
 
 Process:
-1. Greet the user warmly.
-2. Ask about their current energy level and available time.
-3. Propose a workout plan using the `WorkoutCard`.
-4. Refine the plan if the user asks for changes.
-5. Once they are happy, encourage them to "Start Workout" (which triggers a navigate_to_workout event).
+1. Start by reading preferences and history (quietly) to inform your greeting.
+2. Draft a `WorkoutCard` with a suggested plan.
+3. Negotiate any changes using `ExerciseTile` components.
+4. When the user is ready, encourage them to click "Start Workout" on the `WorkoutCard`.
+5. Ensure you have called `saveActiveSession` with the final plan BEFORE the user clicks start, or as a response to them saying they are ready.
+6. The `onStart` action of the `WorkoutCard` should be set to dispatch an event named `start_workout`.
 
 Guidelines:
 - Only bodyweight exercises.

@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'screens/plan_screen.dart';
 import 'screens/workout_screen.dart';
 import 'screens/report_screen.dart';
+import 'providers/navigation_providers.dart';
 
 class MainShell extends ConsumerStatefulWidget {
   const MainShell({super.key});
@@ -12,7 +13,7 @@ class MainShell extends ConsumerStatefulWidget {
 }
 
 class _MainShellState extends ConsumerState<MainShell> {
-  int _selectedIndex = 0;
+  late final PageController _pageController;
 
   static const List<Widget> _screens = [
     PlanScreen(),
@@ -26,20 +27,42 @@ class _MainShellState extends ConsumerState<MainShell> {
     'Performance Report',
   ];
 
-  void _onItemTapped(int index) {
-    setState(() {
-      _selectedIndex = index;
-    });
+  @override
+  void initState() {
+    super.initState();
+    _pageController = PageController();
+  }
+
+  @override
+  void dispose() {
+    _pageController.dispose();
+    super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
+    final selectedIndex = ref.watch(navigationIndexProvider);
+
+    // Sync PageController if index changed from elsewhere
+    if (_pageController.hasClients &&
+        _pageController.page?.round() != selectedIndex) {
+      _pageController.animateToPage(
+        selectedIndex,
+        duration: const Duration(milliseconds: 400),
+        curve: Curves.easeInOutCubic,
+      );
+    }
+
     return Scaffold(
       appBar: AppBar(
-        title: Text(_titles[_selectedIndex]),
-        backgroundColor: Theme.of(context).colorScheme.inversePrimary,
+        title: Text(_titles[selectedIndex]),
       ),
-      body: _screens[_selectedIndex],
+      body: PageView(
+        controller: _pageController,
+        onPageChanged: (index) =>
+            ref.read(navigationIndexProvider.notifier).state = index,
+        children: _screens,
+      ),
       bottomNavigationBar: BottomNavigationBar(
         items: const <BottomNavigationBarItem>[
           BottomNavigationBarItem(
@@ -55,8 +78,15 @@ class _MainShellState extends ConsumerState<MainShell> {
             label: 'Report',
           ),
         ],
-        currentIndex: _selectedIndex,
-        onTap: _onItemTapped,
+        currentIndex: selectedIndex,
+        onTap: (index) {
+          ref.read(navigationIndexProvider.notifier).state = index;
+          _pageController.animateToPage(
+            index,
+            duration: const Duration(milliseconds: 400),
+            curve: Curves.easeInOutCubic,
+          );
+        },
       ),
     );
   }

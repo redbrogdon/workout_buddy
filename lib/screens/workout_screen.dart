@@ -4,6 +4,7 @@ import 'package:genui/genui.dart' hide TextPart;
 import 'package:genui/genui.dart' as genui;
 import 'package:firebase_ai/firebase_ai.dart';
 import '../catalog/catalog.dart';
+import '../tools/storage_tools.dart';
 
 class WorkoutScreen extends ConsumerStatefulWidget {
   const WorkoutScreen({super.key});
@@ -13,10 +14,7 @@ class WorkoutScreen extends ConsumerStatefulWidget {
 }
 
 class _WorkoutScreenState extends ConsumerState<WorkoutScreen> {
-  final model = FirebaseAI.googleAI().generativeModel(
-    model: 'gemini-3-flash-preview',
-  );
-
+  late final GenerativeModel model;
   late final ChatSession _chatSession;
   late final SurfaceController _controller;
   late final A2uiTransportAdapter _transport;
@@ -29,6 +27,11 @@ class _WorkoutScreenState extends ConsumerState<WorkoutScreen> {
   @override
   void initState() {
     super.initState();
+    final tools = ref.read(storageToolsProvider);
+    model = FirebaseAI.googleAI().generativeModel(
+      model: 'gemini-3-flash-preview',
+      tools: tools,
+    );
     _chatSession = model.startChat();
     
     _controller = SurfaceController(catalogs: [workoutBuddyCatalog]);
@@ -95,23 +98,13 @@ class _WorkoutScreenState extends ConsumerState<WorkoutScreen> {
 
   @override
   Widget build(BuildContext context) {
-    // According to spec: Top is pinned SessionSummary, remaining is scrollable exercise cards.
-    // We separate SessionSummary from the rest of the surfaces if it exists.
-    
-    final summaryId = _surfaceIds.firstWhere(
-      (id) {
-        final data = (_controller.contextFor(id).dataModel as dynamic).data;
-        return data is Map && data['component'] == 'SessionSummary';
-      },
-      orElse: () => '',
-    );
-    
-    final otherIds = _surfaceIds.where((id) => id != summaryId).toList();
+    final hasSummary = _surfaceIds.contains('summary');
+    final otherIds = _surfaceIds.where((id) => id != 'summary').toList();
 
     return Column(
       children: [
-        if (summaryId.isNotEmpty)
-          Surface(surfaceContext: _controller.contextFor(summaryId)),
+        if (hasSummary)
+          Surface(surfaceContext: _controller.contextFor('summary')),
         
         ValueListenableBuilder<ConversationState>(
           valueListenable: _conversation.state,
@@ -169,10 +162,11 @@ Your personality is cheerful, energetic, and supportive (Planet Fitness vibe).
 Your goal is to lead the user through their workout plan exercise by exercise.
 
 Process:
-1. Start by displaying a `SessionSummary` with the initial stats.
-2. Present the first exercise using either a `RepsCard` or a `TimerCard`.
-3. Wait for the user to complete the exercise (you will receive an event).
-4. Update the `SessionSummary` and move to the next exercise.
+1. Start by calling `readActiveSession` to understand the workout plan for today.
+2. Display a `SessionSummary` with the initial stats (use a persistent `surfaceId` like 'summary').
+3. Present the first exercise using either a `RepsCard` or a `TimerCard` (use a persistent `surfaceId` like 'exercise_1').
+4. Wait for the user to complete the exercise (you will receive an event).
+5. Update the `SessionSummary` and relevant `ExerciseTile` IN-PLACE.
 5. If the user asks for form tips or suggests a change, respond by updating the UI elements in-place where possible.
 
 Guidelines:
@@ -181,7 +175,7 @@ Guidelines:
 - (Note: In this implementation, text particles from the agent are NOT visible on the Workout Screen, so you MUST rely on updating the UI cards).
 
 Tool Usage:
-- Every time an exercise is completed, use the `saveActiveSession` tool (once implemented) to persist progress.
+- Every time an exercise is completed, use the `saveActiveSession` tool to persist progress to history.
 ''';
 
   @override

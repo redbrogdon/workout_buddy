@@ -12,6 +12,7 @@ import 'firebase_options.dart';
 import 'main_shell.dart';
 import 'services/storage_service.dart';
 import 'providers/storage_providers.dart';
+import 'theme.dart';
 
 void main() async {
   configureLogging(
@@ -42,10 +43,9 @@ class MyApp extends StatelessWidget {
     return MaterialApp(
       title: 'Workout Buddy',
       debugShowCheckedModeBanner: false,
-      theme: ThemeData(
-        colorScheme: ColorScheme.fromSeed(seedColor: Colors.blue),
-        useMaterial3: true,
-      ),
+      theme: WorkoutBuddyTheme.light,
+      darkTheme: WorkoutBuddyTheme.dark,
+      themeMode: ThemeMode.system,
       home: const MainShell(),
     );
   }

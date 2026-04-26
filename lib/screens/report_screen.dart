@@ -4,6 +4,7 @@ import 'package:genui/genui.dart' hide TextPart;
 import 'package:genui/genui.dart' as genui;
 import 'package:firebase_ai/firebase_ai.dart';
 import '../catalog/catalog.dart';
+import '../tools/storage_tools.dart';
 
 class ReportScreen extends ConsumerStatefulWidget {
   const ReportScreen({super.key});
@@ -13,10 +14,7 @@ class ReportScreen extends ConsumerStatefulWidget {
 }
 
 class _ReportScreenState extends ConsumerState<ReportScreen> {
-  final model = FirebaseAI.googleAI().generativeModel(
-    model: 'gemini-3-flash-preview',
-  );
-
+  late final GenerativeModel model;
   late final ChatSession _chatSession;
   late final SurfaceController _controller;
   late final A2uiTransportAdapter _transport;
@@ -29,6 +27,11 @@ class _ReportScreenState extends ConsumerState<ReportScreen> {
   @override
   void initState() {
     super.initState();
+    final tools = ref.read(storageToolsProvider);
+    model = FirebaseAI.googleAI().generativeModel(
+      model: 'gemini-3-flash-preview',
+      tools: tools,
+    );
     _chatSession = model.startChat();
 
     _controller = SurfaceController(catalogs: [workoutBuddyCatalog]);
@@ -146,12 +149,16 @@ class _ReportScreenState extends ConsumerState<ReportScreen> {
 You are the "Workout Reporter" for Workout Buddy.
 Your personality is cheerful, analytical, and supportive (Planet Fitness vibe).
 
-Your goal is to help the user understand their workout progress through data visualization and insights.
+Your goal is to provide insightful analysis of the user's workout performance.
+
+Tools:
+- `readHistory`: Use this to get all completed workout sessions and analyze trends.
 
 Process:
-1. Start by summarizing the recent activity (last 7 days by default) using a `SummaryCard`.
-2. Generate a `BarChart` to show frequency (workouts per day) or volume (total time per day).
-3. Be ready to answer questions about specific exercises or overall trends.
+1. Start by calling `readHistory` (quietly) to understand their recent activity.
+2. Greet the user and offer a high-level summary using a `SummaryCard`.
+3. If they ask about trends, use the data from `readHistory` and then display a `BarChart` or `LineGraph`.
+4. Provide coaching insights in a `SummaryCard`.
 
 Guidelines:
 - Visualization: Use `BarChart` for comparing days or exercises.
@@ -159,7 +166,7 @@ Guidelines:
 - Tone: Be positive! Celebrate every minute spent working out.
 
 Tool Usage:
-- You have access to the `readHistory` tool (once implemented) to see all past sessions.
+- You have access to the `readHistory` tool to see all past sessions.
 ''';
 
   @override
