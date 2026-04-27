@@ -90,69 +90,83 @@ class _WorkoutScreenState extends ConsumerState<WorkoutScreen> {
         .where((id) => id != 'summary' && id != 'workout_card')
         .toList();
 
-    return Column(
+    return Stack(
       children: [
+        Column(
+          children: [
+            if (hasSummary)
+              Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: Surface(
+                  surfaceContext: _controller.contextFor('summary'),
+                ),
+              ),
+
+            if (hasWorkoutCard)
+              Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: Surface(
+                  surfaceContext: _controller.contextFor('workout_card'),
+                ),
+              ),
+
+            Expanded(
+              child: ListView.builder(
+                controller: _scrollController,
+                itemCount: otherIds.length,
+                itemBuilder: (context, index) {
+                  final id = otherIds[index];
+                  return Padding(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 8.0,
+                      vertical: 4.0,
+                    ),
+                    child: Surface(surfaceContext: _controller.contextFor(id)),
+                  );
+                },
+              ),
+            ),
+
+            // Chat input bar
+            Padding(
+              padding: const EdgeInsets.all(16.0),
+              child: Row(
+                children: [
+                  Expanded(
+                    child: TextField(
+                      controller: _textController,
+                      onSubmitted: (_) => _sendMessage(),
+                      decoration: const InputDecoration(
+                        hintText: 'Ask your coach anything...',
+                        border: OutlineInputBorder(),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(width: 8),
+                  IconButton(
+                    icon: const Icon(Icons.send),
+                    onPressed: _sendMessage,
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
         ValueListenableBuilder<ConversationState>(
           valueListenable: _conversation.state,
           builder: (context, state, child) {
-            if (state.isWaiting) return const LinearProgressIndicator();
+            if (state.isWaiting) {
+              return const Positioned(
+                top: 0,
+                left: 0,
+                right: 0,
+                child: LinearProgressIndicator(
+                  minHeight: 4,
+                ),
+              );
+            }
             return const SizedBox.shrink();
           },
-        ),
-
-        if (hasSummary)
-          Padding(
-            padding: const EdgeInsets.all(8.0),
-            child: Surface(surfaceContext: _controller.contextFor('summary')),
-          ),
-
-        if (hasWorkoutCard)
-          Padding(
-            padding: const EdgeInsets.all(8.0),
-            child: Surface(
-              surfaceContext: _controller.contextFor('workout_card'),
-            ),
-          ),
-
-        Expanded(
-          child: ListView.builder(
-            controller: _scrollController,
-            itemCount: otherIds.length,
-            itemBuilder: (context, index) {
-              final id = otherIds[index];
-              return Padding(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 8.0,
-                  vertical: 4.0,
-                ),
-                child: Surface(surfaceContext: _controller.contextFor(id)),
-              );
-            },
-          ),
-        ),
-
-        // Chat input bar
-        Padding(
-          padding: const EdgeInsets.all(16.0),
-          child: Row(
-            children: [
-              Expanded(
-                child: TextField(
-                  controller: _textController,
-                  onSubmitted: (_) => _sendMessage(),
-                  decoration: const InputDecoration(
-                    hintText: 'Ask your coach anything...',
-                    border: OutlineInputBorder(),
-                  ),
-                ),
-              ),
-              const SizedBox(width: 8),
-              IconButton(
-                icon: const Icon(Icons.send),
-                onPressed: _sendMessage,
-              ),
-            ],
-          ),
         ),
       ],
     );

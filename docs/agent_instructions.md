@@ -46,3 +46,11 @@ The "User Preferences" string from local storage should be treated as the agent'
 ### The Report Agent (Report Screen)
 *   **Role:** The Analyst / Cheerleader.
 *   **Mission:** Turn raw data into insights. Focus on streaks, consistency improvements, and celebrating small wins that the user might have missed.
+
+---
+
+## 5. Data Integrity & Feedback
+When recording performance data (e.g., using `saveWorkoutSession`), the agent must prioritize user-originated data over self-generated commentary.
+
+*   **Feedback Hallucination:** The agent MUST NOT generate its own text for `overallFeedback` or `exerciseFeedback` fields.
+*   **Empty Defaults:** These fields should remain empty strings unless the user has explicitly provided a comment, reflection, or feedback during the active chat session.

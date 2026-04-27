@@ -31,7 +31,7 @@ Upon launch, the Agent starts a conversation to determine the user's goals for t
 4.  **Acceptance**: When the user is satisfied, they tap "Start Workout". The Agent saves the initial plan to history with a unique session ID.
 
 ### Phase 2: Execution & Tracking
-Once the workout begins, the screen transitions to focus on guiding the user through each exercise.
+Once the workout begins, the Agent **removes the `WorkoutCard`** and transitions the focus to guiding the user through each exercise.
 
 1.  **Guidance**: The Agent presents the active exercise using a `TimerCard` or `RepsCard`.
 2.  **Tracking**: The Agent waits for the user to complete each set.
@@ -54,7 +54,7 @@ The agent uses the following custom components from the `workoutBuddyCatalog`:
 *   **RepsCard**: Active guidance for repetition-based moves (e.g., Pushups) with input for actual reps completed.
 
 ## Composition & Layout
-*   **Pinned Header**: The `SessionSummary` (in Phase 2) or `WorkoutCard` (in Phase 1) should stay at the top.
+*   **Pinned Header**: The `SessionSummary` (in Phase 2) or `WorkoutCard` (in Phase 1) stays at the top. Note: the `WorkoutCard` is removed as soon as Phase 2 begins.
 *   **Dynamic List**: Exercise cards appear below as the user progresses.
 *   **Chat Input**: A persistent bar at the bottom for communicating with the coach.
 *   **No History**: Chronological chat bubbles are suppressed; the Agent's responses are reflected in the UI cards.

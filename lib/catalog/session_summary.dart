@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:genui/genui.dart';
 import 'package:json_schema_builder/json_schema_builder.dart';
@@ -47,21 +48,85 @@ final sessionSummary = CatalogItem(
   },
 );
 
-class SessionSummary extends StatelessWidget {
+class SessionSummary extends StatefulWidget {
   final SessionSummaryData data;
 
   const SessionSummary({super.key, required this.data});
 
   @override
+  State<SessionSummary> createState() => _SessionSummaryState();
+}
+
+class _SessionSummaryState extends State<SessionSummary> {
+  late int _elapsedSeconds;
+  Timer? _timer;
+
+  @override
+  void initState() {
+    super.initState();
+    _elapsedSeconds = widget.data.elapsedSeconds;
+    _startTimer();
+  }
+
+  @override
+  void didUpdateWidget(SessionSummary oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    // If the agent updates the time (e.g. after a long think), sync to it.
+    if (oldWidget.data.elapsedSeconds != widget.data.elapsedSeconds) {
+      setState(() {
+        _elapsedSeconds = widget.data.elapsedSeconds;
+      });
+    }
+
+    final isComplete =
+        widget.data.completedExercises >= widget.data.totalExercises;
+    if (isComplete) {
+      _timer?.cancel();
+      _timer = null;
+    } else if (_timer == null) {
+      _startTimer();
+    }
+  }
+
+  void _startTimer() {
+    final isComplete =
+        widget.data.completedExercises >= widget.data.totalExercises;
+    if (isComplete) return;
+
+    _timer?.cancel();
+    _timer = Timer.periodic(const Duration(seconds: 1), (timer) {
+      if (mounted) {
+        setState(() {
+          _elapsedSeconds++;
+        });
+      }
+    });
+  }
+
+  @override
+  void dispose() {
+    _timer?.cancel();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final progress = data.totalExercises > 0
-        ? data.completedExercises / data.totalExercises
+    final isComplete =
+        widget.data.completedExercises >= widget.data.totalExercises;
+
+    final progress = widget.data.totalExercises > 0
+        ? widget.data.completedExercises / widget.data.totalExercises
         : 0.0;
-    final minutes = (data.elapsedSeconds / 60).floor();
-    final seconds = data.elapsedSeconds % 60;
+
+    final minutes = (_elapsedSeconds / 60).floor();
+    final seconds = _elapsedSeconds % 60;
     final timeStr =
         '${minutes.toString().padLeft(2, '0')}:${seconds.toString().padLeft(2, '0')}';
+
+    final statusText = isComplete
+        ? 'Workout Complete!'
+        : 'Exercise ${widget.data.completedExercises + 1} of ${widget.data.totalExercises}';
 
     return Card(
       elevation: 4,
@@ -74,7 +139,7 @@ class SessionSummary extends StatelessWidget {
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 Text(
-                  'Exercise ${data.completedExercises + 1} of ${data.totalExercises}',
+                  statusText,
                   style: theme.textTheme.titleMedium,
                 ),
                 Text(
