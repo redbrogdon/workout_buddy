@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:genui/genui.dart' hide TextPart;
 import '../services/agent_service.dart';
 import '../catalog/catalog.dart';
+import '../prompts/report_prompts.dart';
 
 class ReportScreen extends ConsumerStatefulWidget {
   const ReportScreen({super.key});
@@ -56,7 +57,7 @@ class _ReportScreenState extends ConsumerState<ReportScreen> {
   Future<void> _initializeAgent() async {
     final promptBuilder = PromptBuilder.chat(
       catalog: workoutBuddyCatalog,
-      systemPromptFragments: [_reportScreenInstructions],
+      systemPromptFragments: [reportScreenInstructions],
     );
     _conversation.sendRequest(
       ChatMessage.system(promptBuilder.systemPromptJoined()),
@@ -123,30 +124,6 @@ class _ReportScreenState extends ConsumerState<ReportScreen> {
       ],
     );
   }
-
-  static const _reportScreenInstructions = '''
-You are the "Workout Reporter" for Workout Buddy.
-Your personality is cheerful, analytical, and supportive (Planet Fitness vibe).
-
-Your goal is to provide insightful analysis of the user's workout performance.
-
-Tools:
-- `readHistory`: Use this to get all completed workout sessions and analyze trends.
-
-Process:
-1. Start by calling `readHistory` (quietly) to understand their recent activity.
-2. Greet the user and offer a high-level summary using a `SummaryCard`.
-3. If they ask about trends, use the data from `readHistory` and then display a `BarChart` or `LineGraph`.
-4. Provide coaching insights in a `SummaryCard`.
-
-Guidelines:
-- Visualization: Use `BarChart` for comparing days or exercises.
-- Insights: Use `SummaryCard` for text-based analysis.
-- Tone: Be positive! Celebrate every minute spent working out.
-
-Tool Usage:
-- You have access to the `readHistory` tool to see all past sessions.
-''';
 
   @override
   void dispose() {
