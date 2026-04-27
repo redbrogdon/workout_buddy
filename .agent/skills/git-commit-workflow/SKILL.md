@@ -39,6 +39,5 @@ When tasked with committing changes to the main branch, follow these steps:
 - Do NOT include long descriptions unless explicitly requested.
 - Ensure the first word is capitalized.
 - Stay under the 60-character limit for the first line.
-- Do NOT modify any files.
 - Do NOT change git branches.
-- Do NOT add or remove any files.
+- Other than staging and committing, avoid modifying any files in the codebase.
