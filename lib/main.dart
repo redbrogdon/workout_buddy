@@ -10,6 +10,7 @@ import 'package:genui/genui.dart';
 import 'package:file/local.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:workout_buddy/services/mock_storage_service.dart';
 
 import 'firebase_options.dart';
 import 'main_shell.dart';
@@ -27,16 +28,20 @@ void main() async {
 
   StorageService storageService;
 
-  if (kIsWeb) {
-    final prefs = await SharedPreferences.getInstance();
-    storageService = SharedPreferencesStorageService(prefs);
-  } else {
-    final docsDir = await getApplicationDocumentsDirectory();
-    storageService = FileStorageService(
-      fs: const LocalFileSystem(),
-      basePath: docsDir.path,
-    );
-  }
+  // Use this version when debugging:
+  storageService = MockStorageService.withSeedData();
+
+  // Choose the uncommented version for production:
+  // if (kIsWeb) {
+  //   final prefs = await SharedPreferences.getInstance();
+  //   storageService = SharedPreferencesStorageService(prefs);
+  // } else {
+  //   final docsDir = await getApplicationDocumentsDirectory();
+  //   storageService = FileStorageService(
+  //     fs: const LocalFileSystem(),
+  //     basePath: docsDir.path,
+  //   );
+  // }
 
   runApp(
     ProviderScope(
