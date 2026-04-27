@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:firebase_ai/firebase_ai.dart' as firebase_ai;
 import 'package:genai_primitives/genai_primitives.dart' as genai;
+import 'package:logging/logging.dart';
 import '../tools/storage_tools.dart';
 
 /// Abstract interface for the workout agent service.
@@ -16,6 +17,7 @@ abstract class AgentService {
 /// Firebase implementation of the [AgentService].
 class FirebaseAgentService implements AgentService {
   final firebase_ai.ChatSession _chatSession;
+  final _logger = Logger('FirebaseAgentService');
 
   FirebaseAgentService({
     required firebase_ai.GenerativeModel model,
@@ -46,11 +48,27 @@ class FirebaseAgentService implements AgentService {
 
     if (buffer.isEmpty) return null;
 
-    final response = await _chatSession.sendMessage(
-      firebase_ai.Content.text(buffer.toString()),
+    final requestText = buffer.toString();
+
+    _logger.info(
+      '******** MESSAGE FROM ME ********'
+      '$requestText'
+      '*********************************',
     );
 
-    return response.text;
+    final response = await _chatSession.sendMessage(
+      firebase_ai.Content.text(requestText),
+    );
+
+    final responseText = response.text;
+
+    _logger.info(
+      '******** MESSAGE FROM AGENT ********'
+      '$responseText'
+      '************************************',
+    );
+
+    return responseText;
   }
 
   @override

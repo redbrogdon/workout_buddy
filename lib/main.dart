@@ -6,6 +6,7 @@ import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:genui/genui.dart';
+import 'package:logging/logging.dart';
 import 'package:workout_buddy/services/mock_storage_service.dart';
 
 import 'firebase_options.dart';
@@ -15,6 +16,11 @@ import 'providers/storage_providers.dart';
 import 'theme.dart';
 
 void main() async {
+  Logger.root.level = Level.ALL;
+  Logger.root.onRecord.listen((record) {
+    debugPrint('${record.level.name}: ${record.time}: ${record.message}');
+  });
+
   configureLogging(
     logCallback: (level, msg) => debugPrint('GenUI $level: $msg'),
   );
