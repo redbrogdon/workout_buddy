@@ -31,14 +31,6 @@ class MockStorageService implements StorageService {
     final random = Random();
     final history = <WorkoutSessionRecord>[];
 
-    final workoutNames = [
-      'Full Body Blast',
-      'Lower Body Power',
-      'Upper Body Strength',
-      'Core Crusher',
-      'Morning Mobility',
-    ];
-
     final exercisePool = [
       {'name': 'Pushups', 'reps': 15, 'timed': false},
       {'name': 'Squats', 'reps': 20, 'timed': false},
