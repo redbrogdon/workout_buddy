@@ -27,12 +27,12 @@ void main() {
         ),
       );
 
-      expect(find.text('Pushups'), findsOneWidget);
+      expect(find.text('PUSHUPS'), findsOneWidget);
       expect(find.byKey(const ValueKey('target_reps')), findsOneWidget);
       expect(find.byKey(const ValueKey('reps_completed_text')), findsOneWidget);
       expect(
         tester.widget<Text>(find.byKey(const ValueKey('target_reps'))).data,
-        '10',
+        ' / 10 REPS',
       );
       expect(
         tester

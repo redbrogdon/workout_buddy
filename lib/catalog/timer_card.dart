@@ -171,75 +171,115 @@ class _TimerCardState extends State<TimerCard> {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    return Card(
-      elevation: 4,
+    final progress = widget.data.suggestedDuration > 0
+        ? actualDuration / widget.data.suggestedDuration
+        : 0.0;
+
+    return Container(
       margin: const EdgeInsets.symmetric(vertical: 16.0, horizontal: 16.0),
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+      padding: const EdgeInsets.all(24.0),
+      decoration: BoxDecoration(
+        color: theme.colorScheme.surfaceContainerHighest.withValues(alpha: 0.3),
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: theme.colorScheme.outlineVariant),
+      ),
       child: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          Padding(
-            padding: const EdgeInsets.all(16.0),
-            child: Text(
-              widget.data.exercise,
-              key: const ValueKey('exercise_name'),
-              style: theme.textTheme.headlineSmall?.copyWith(
-                fontWeight: FontWeight.bold,
+          Text(
+            widget.data.exercise.toUpperCase(),
+            key: const ValueKey('exercise_name'),
+            style: theme.textTheme.headlineSmall?.copyWith(
+              fontWeight: FontWeight.bold,
+              letterSpacing: 1.2,
+            ),
+            textAlign: TextAlign.center,
+          ),
+          const SizedBox(height: 8),
+          Text(
+            widget.data.instructions,
+            key: const ValueKey('instructions'),
+            style: theme.textTheme.bodyMedium?.copyWith(
+              color: theme.colorScheme.onSurfaceVariant,
+            ),
+            textAlign: TextAlign.center,
+          ),
+          const SizedBox(height: 32),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            crossAxisAlignment: CrossAxisAlignment.baseline,
+            textBaseline: TextBaseline.alphabetic,
+            children: [
+              Text(
+                '$actualDuration',
+                key: const ValueKey('actual_duration'),
+                style: theme.textTheme.displayLarge?.copyWith(
+                  color: theme.colorScheme.primary,
+                  fontWeight: FontWeight.bold,
+                  fontSize: 72,
+                  fontFeatures: const [FontFeature.tabularFigures()],
+                ),
+              ),
+              Text(
+                ' / ${widget.data.suggestedDuration} SEC',
+                key: const ValueKey('suggested_duration'),
+                style: theme.textTheme.titleLarge?.copyWith(
+                  color: theme.colorScheme.onSurfaceVariant,
+                  fontFeatures: const [FontFeature.tabularFigures()],
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 32),
+          ClipRRect(
+            borderRadius: BorderRadius.circular(4),
+            child: LinearProgressIndicator(
+              value: progress.clamp(0.0, 1.0),
+              minHeight: 8,
+              backgroundColor: theme.colorScheme.surface,
+              valueColor: AlwaysStoppedAnimation<Color>(
+                theme.colorScheme.primary,
               ),
             ),
           ),
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 16.0),
-            child: Text(
-              widget.data.instructions,
-              key: const ValueKey('instructions'),
-              style: theme.textTheme.bodyMedium,
-            ),
+          const SizedBox(height: 32),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            spacing: 16,
+            children: [
+              IconButton.filledTonal(
+                key: const ValueKey('reset_timer'),
+                icon: const Icon(Icons.refresh),
+                iconSize: 32,
+                onPressed: widget.data.isCompleted ? null : _resetTimer,
+              ),
+              IconButton.filled(
+                key: const ValueKey('toggle_timer'),
+                icon: Icon(
+                  (_timer?.isActive ?? false) ? Icons.pause : Icons.play_arrow,
+                ),
+                iconSize: 32,
+                onPressed: widget.data.isCompleted ? null : _toggleTimer,
+              ),
+            ],
           ),
-          Padding(
-            padding: const EdgeInsets.all(16.0),
-            child: Text(
-              'Suggested Duration: ${widget.data.suggestedDuration}s',
-              key: const ValueKey('suggested_duration'),
-              style: theme.textTheme.titleMedium,
-            ),
-          ),
-          const Divider(),
-          Padding(
-            padding: const EdgeInsets.all(16.0),
-            child: Row(
-              spacing: 8,
-              children: [
-                const Text('Actual Duration:'),
-                Text(
-                  '${actualDuration}s',
-                  key: const ValueKey('actual_duration'),
-                ),
-                IconButton(
-                  key: const ValueKey('toggle_timer'),
-                  icon: Icon(
-                    (_timer?.isActive ?? false)
-                        ? Icons.pause
-                        : Icons.play_arrow,
-                  ),
-                  onPressed: widget.data.isCompleted ? null : _toggleTimer,
-                ),
-                IconButton(
-                  key: const ValueKey('reset_timer'),
-                  icon: const Icon(Icons.refresh),
-                  onPressed: widget.data.isCompleted ? null : _resetTimer,
-                ),
-                IconButton(
-                  key: const ValueKey('complete_button'),
-                  icon: const Icon(Icons.check),
-                  onPressed: widget.data.isCompleted
-                      ? null
-                      : () {
-                          _timer?.cancel();
-                          widget.onCompleted(actualDuration);
-                        },
-                ),
-              ],
+          const SizedBox(height: 24),
+          SizedBox(
+            width: double.infinity,
+            child: FilledButton(
+              key: const ValueKey('complete_button'),
+              style: FilledButton.styleFrom(
+                padding: const EdgeInsets.symmetric(vertical: 20),
+              ),
+              onPressed: widget.data.isCompleted
+                  ? null
+                  : () {
+                      _timer?.cancel();
+                      widget.onCompleted(actualDuration);
+                    },
+              child: const Text(
+                'COMPLETE SET',
+                style: TextStyle(letterSpacing: 2.0),
+              ),
             ),
           ),
         ],

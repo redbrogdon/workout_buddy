@@ -7,6 +7,7 @@ import 'session_summary.dart';
 import 'report_widgets.dart';
 
 import 'ai_proposal_card.dart';
+import 'active_workout_widgets.dart';
 
 final workoutBuddyCatalog = BasicCatalogItems.asCatalog().copyWith(
   newItems: [
@@ -16,6 +17,7 @@ final workoutBuddyCatalog = BasicCatalogItems.asCatalog().copyWith(
     timerCard,
     exerciseTile,
     sessionSummary,
+    estimatedCaloriesCard,
     barChart,
     summaryCard,
   ],

@@ -65,6 +65,12 @@ A dashboard tracking overall session progress.
     - `completedExercises` (integer): The number of exercises completed so far.
     - `elapsedSeconds` (integer): Total elapsed time in seconds.
 
+### EstimatedCalories
+Displays the estimated calories burned after the workout session is complete.
+*   **Role:** Motivational summary widget.
+*   **Fields:**
+    - `calories` (integer): Estimated calories burned during the workout.
+
 ---
 
 ## Reporting Components

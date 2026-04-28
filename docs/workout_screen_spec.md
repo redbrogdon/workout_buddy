@@ -53,6 +53,7 @@ The agent uses the following custom components from the `workoutBuddyCatalog`:
 *   **SessionSummary**: A persistent dashboard pinned at the top tracking overall progress (e.g., "Exercise 3 of 8").
 *   **TimerCard**: Active guidance for timed exercises (e.g., Planks) with a client-side timer.
 *   **RepsCard**: Active guidance for repetition-based moves (e.g., Pushups) with input for actual reps completed.
+*   **EstimatedCalories**: Motivational summary of estimated calories burned, shown at the end.
 
 ## Composition & Layout
 *   **Pinned Header**: The `SessionSummary` (in Phase 2) or `WorkoutCard` (in Phase 1) stays at the top. Note: the `WorkoutCard` is removed as soon as Phase 2 begins.

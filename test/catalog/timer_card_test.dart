@@ -28,10 +28,10 @@ void main() {
         ),
       );
 
-      expect(find.text('Plank'), findsOneWidget);
+      expect(find.text('PLANK'), findsOneWidget);
       expect(find.text('Stay flat.'), findsOneWidget);
-      expect(find.text('Suggested Duration: 60s'), findsOneWidget);
-      expect(find.text('0s'), findsOneWidget);
+      expect(find.text(' / 60 SEC'), findsOneWidget);
+      expect(find.text('0'), findsOneWidget);
     });
 
     testWidgets('Timer increments when play is pressed', (
@@ -55,7 +55,7 @@ void main() {
       // Wait 2 seconds
       await tester.pump(const Duration(seconds: 2));
 
-      expect(find.text('2s'), findsOneWidget);
+      expect(find.text('2'), findsOneWidget);
 
       // Press Pause
       await tester.tap(find.byKey(const ValueKey('toggle_timer')));
@@ -63,7 +63,7 @@ void main() {
 
       // Wait another 2 seconds, should stay at 2s
       await tester.pump(const Duration(seconds: 2));
-      expect(find.text('2s'), findsOneWidget);
+      expect(find.text('2'), findsOneWidget);
     });
 
     testWidgets('Reset button clears duration', (WidgetTester tester) async {
@@ -81,13 +81,13 @@ void main() {
       // Press Play and wait
       await tester.tap(find.byKey(const ValueKey('toggle_timer')));
       await tester.pump(const Duration(seconds: 5));
-      expect(find.text('5s'), findsOneWidget);
+      expect(find.text('5'), findsOneWidget);
 
       // Press Reset
       await tester.tap(find.byKey(const ValueKey('reset_timer')));
       await tester.pump();
 
-      expect(find.text('0s'), findsOneWidget);
+      expect(find.text('0'), findsOneWidget);
     });
 
     testWidgets('Complete button calls onCompleted with actual duration', (

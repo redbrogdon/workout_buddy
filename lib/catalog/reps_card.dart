@@ -141,64 +141,111 @@ class _RepsCardState extends State<RepsCard> {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    return Card(
-      elevation: 4,
+    final progress = widget.data.numberOfReps > 0
+        ? repsCompleted / widget.data.numberOfReps
+        : 0.0;
+
+    return Container(
       margin: const EdgeInsets.symmetric(vertical: 16.0, horizontal: 16.0),
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+      padding: const EdgeInsets.all(24.0),
+      decoration: BoxDecoration(
+        color: theme.colorScheme.surfaceContainerHighest.withValues(alpha: 0.3),
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: theme.colorScheme.outlineVariant),
+      ),
       child: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          Padding(
-            padding: const EdgeInsets.all(16.0),
-            child: Text(
-              widget.data.exercise,
-              key: const ValueKey('exercise_name'),
-              style: theme.textTheme.headlineSmall?.copyWith(
-                fontWeight: FontWeight.bold,
+          Text(
+            widget.data.exercise.toUpperCase(),
+            key: const ValueKey('exercise_name'),
+            style: theme.textTheme.headlineSmall?.copyWith(
+              fontWeight: FontWeight.bold,
+              letterSpacing: 1.2,
+            ),
+            textAlign: TextAlign.center,
+          ),
+          const SizedBox(height: 8),
+          Text(
+            widget.data.instructions,
+            style: theme.textTheme.bodyMedium?.copyWith(
+              color: theme.colorScheme.onSurfaceVariant,
+            ),
+            textAlign: TextAlign.center,
+          ),
+          const SizedBox(height: 32),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            crossAxisAlignment: CrossAxisAlignment.baseline,
+            textBaseline: TextBaseline.alphabetic,
+            children: [
+              Text(
+                '$repsCompleted',
+                key: const ValueKey('reps_completed_text'),
+                style: theme.textTheme.displayLarge?.copyWith(
+                  color: theme.colorScheme.primary,
+                  fontWeight: FontWeight.bold,
+                  fontSize: 72,
+                ),
+              ),
+              Text(
+                ' / ${widget.data.numberOfReps} REPS',
+                key: const ValueKey('target_reps'),
+                style: theme.textTheme.titleLarge?.copyWith(
+                  color: theme.colorScheme.onSurfaceVariant,
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 32),
+          ClipRRect(
+            borderRadius: BorderRadius.circular(4),
+            child: LinearProgressIndicator(
+              value: progress.clamp(0.0, 1.0),
+              minHeight: 8,
+              backgroundColor: theme.colorScheme.surface,
+              valueColor: AlwaysStoppedAnimation<Color>(
+                theme.colorScheme.primary,
               ),
             ),
           ),
-          Padding(
-            padding: const EdgeInsets.all(16.0),
-            child: Text(
-              '${widget.data.numberOfReps}',
-              key: const ValueKey('target_reps'),
-              style: theme.textTheme.headlineSmall,
-            ),
+          const SizedBox(height: 32),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            spacing: 16,
+            children: [
+              IconButton.filledTonal(
+                key: const ValueKey('decrement_reps'),
+                icon: const Icon(Icons.remove),
+                iconSize: 32,
+                onPressed: widget.data.isCompleted || repsCompleted <= 0
+                    ? null
+                    : () => setState(() => repsCompleted--),
+              ),
+              IconButton.filledTonal(
+                key: const ValueKey('increment_reps'),
+                icon: const Icon(Icons.add),
+                iconSize: 32,
+                onPressed: widget.data.isCompleted
+                    ? null
+                    : () => setState(() => repsCompleted++),
+              ),
+            ],
           ),
-          const Divider(),
-          Padding(
-            padding: const EdgeInsets.all(16.0),
-            child: Row(
-              spacing: 8,
-              children: [
-                const Text('Reps completed:'),
-                Text(
-                  '$repsCompleted',
-                  key: const ValueKey('reps_completed_text'),
-                ),
-                IconButton(
-                  key: const ValueKey('increment_reps'),
-                  icon: const Icon(Icons.arrow_upward),
-                  onPressed: widget.data.isCompleted
-                      ? null
-                      : () => setState(() => repsCompleted++),
-                ),
-                IconButton(
-                  key: const ValueKey('decrement_reps'),
-                  icon: const Icon(Icons.arrow_downward),
-                  onPressed: widget.data.isCompleted
-                      ? null
-                      : () => setState(() => repsCompleted--),
-                ),
-                IconButton(
-                  key: const ValueKey('complete_button'),
-                  icon: const Icon(Icons.check),
-                  onPressed: widget.data.isCompleted
-                      ? null
-                      : () => widget.onCompleted(repsCompleted),
-                ),
-              ],
+          const SizedBox(height: 24),
+          SizedBox(
+            width: double.infinity,
+            child: FilledButton(
+              key: const ValueKey('complete_button'),
+              style: FilledButton.styleFrom(
+                padding: const EdgeInsets.symmetric(vertical: 20),
+              ),
+              onPressed: widget.data.isCompleted
+                  ? null
+                  : () => widget.onCompleted(repsCompleted),
+              child: const Text(
+                'COMPLETE SET',
+                style: TextStyle(letterSpacing: 2.0),
+              ),
             ),
           ),
         ],
