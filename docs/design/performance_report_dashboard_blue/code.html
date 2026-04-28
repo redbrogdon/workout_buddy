@@ -1,0 +1,320 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Workout Buddy - Performance Report</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Lexend:wght@100..900&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            "colors": {
+                    "inverse-on-surface": "#2b3139",
+                    "on-tertiary-fixed": "#0d1c32",
+                    "on-primary": "#003543",
+                    "tertiary-fixed": "#d6e3ff",
+                    "surface-dim": "#0e141b",
+                    "outline-variant": "#3c494e",
+                    "surface-container-highest": "#30353d",
+                    "inverse-surface": "#dee2ed",
+                    "surface-tint": "#4cd6ff",
+                    "primary-fixed-dim": "#4cd6ff",
+                    "background": "#0e141b",
+                    "on-primary-container": "#00566a",
+                    "on-secondary": "#003256",
+                    "outline": "#859399",
+                    "primary-container": "#00d1ff",
+                    "secondary-fixed": "#d0e4ff",
+                    "secondary-fixed-dim": "#9ccaff",
+                    "error": "#ffb4ab",
+                    "on-error": "#690005",
+                    "surface-container-lowest": "#090e16",
+                    "surface-container-high": "#252a32",
+                    "primary": "#a4e6ff",
+                    "surface-container": "#1b2028",
+                    "secondary": "#9ccaff",
+                    "on-tertiary": "#233148",
+                    "surface-variant": "#30353d",
+                    "on-surface-variant": "#bbc9cf",
+                    "on-tertiary-container": "#414f68",
+                    "secondary-container": "#005a95",
+                    "on-primary-fixed-variant": "#004e60",
+                    "tertiary": "#cfddfb",
+                    "on-secondary-fixed": "#001d35",
+                    "surface-bright": "#343942",
+                    "inverse-primary": "#00677f",
+                    "on-secondary-fixed-variant": "#00497a",
+                    "on-background": "#dee2ed",
+                    "tertiary-container": "#b3c1de",
+                    "on-primary-fixed": "#001f28",
+                    "on-secondary-container": "#a9d1ff",
+                    "primary-fixed": "#b7eaff",
+                    "on-error-container": "#ffdad6",
+                    "on-surface": "#dee2ed",
+                    "surface": "#0e141b",
+                    "surface-container-low": "#171c24",
+                    "error-container": "#93000a",
+                    "on-tertiary-fixed-variant": "#39475f",
+                    "tertiary-fixed-dim": "#b9c7e4"
+            },
+            "borderRadius": {
+                    "DEFAULT": "0.125rem",
+                    "lg": "0.25rem",
+                    "xl": "0.5rem",
+                    "full": "0.75rem"
+            },
+            "spacing": {
+                    "xl": "80px",
+                    "margin": "32px",
+                    "sm": "12px",
+                    "base": "8px",
+                    "lg": "48px",
+                    "xs": "4px",
+                    "gutter": "24px",
+                    "md": "24px"
+            },
+            "fontFamily": {
+                    "label-md": ["Lexend"],
+                    "headline-xl": ["Lexend"],
+                    "label-lg": ["Lexend"],
+                    "headline-lg": ["Lexend"],
+                    "label-sm": ["Lexend"],
+                    "body-sm": ["Lexend"],
+                    "headline-md": ["Lexend"],
+                    "body-lg": ["Lexend"],
+                    "body-md": ["Lexend"]
+            },
+            "fontSize": {
+                    "label-md": ["12px", {"lineHeight": "14px", "letterSpacing": "0.05em", "fontWeight": "500"}],
+                    "headline-xl": ["48px", {"lineHeight": "56px", "letterSpacing": "-0.02em", "fontWeight": "700"}],
+                    "label-lg": ["14px", {"lineHeight": "16px", "letterSpacing": "0.05em", "fontWeight": "600"}],
+                    "headline-lg": ["32px", {"lineHeight": "40px", "letterSpacing": "-0.01em", "fontWeight": "600"}],
+                    "label-sm": ["10px", {"lineHeight": "12px", "letterSpacing": "0.08em", "fontWeight": "700"}],
+                    "body-sm": ["14px", {"lineHeight": "20px", "fontWeight": "400"}],
+                    "headline-md": ["24px", {"lineHeight": "32px", "fontWeight": "600"}],
+                    "body-lg": ["18px", {"lineHeight": "28px", "fontWeight": "400"}],
+                    "body-md": ["16px", {"lineHeight": "24px", "fontWeight": "400"}]
+            }
+          },
+        },
+      }
+    </script>
+<style>
+        .glass-card {
+            background: rgba(27, 32, 40, 0.6);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(0, 209, 255, 0.15);
+        }
+        .chart-gradient {
+            background: linear-gradient(180deg, rgba(76, 214, 255, 0.2) 0%, rgba(76, 214, 255, 0) 100%);
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-background text-on-background font-body-md min-h-screen pb-32">
+<!-- TopAppBar from JSON -->
+<header class="fixed top-0 w-full z-50 bg-slate-950/80 backdrop-blur-md border-b border-cyan-900/50 shadow-[0_0_15px_rgba(0,209,255,0.05)] flex justify-between items-center px-6 h-16">
+<div class="flex items-center gap-3">
+<div class="w-8 h-8 rounded-full overflow-hidden border border-primary-container">
+<img class="w-full h-full object-cover" data-alt="Close up portrait of a fit athlete with determined expression in a moody gym setting" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAgBbLnnSkR9uZzdx9LA_EQg2okzWXHcc8OJ5U60mHZqDwRH31_OIejnu28H0mhh_MmxnrneigYg4UdPLYuj5jJNa22lPRrff5Lo5bA-VvzOBXz8e3Kg9sHtWE6NU_GJ36P8uTNax8IxoRsd8hycJ9mqFDTgC4esEsuUshpfkLHv1cC34bep-Tliz60alPI9YSPkVeREqXGnQeB1SScjtfpUN5JBaGxHAg8vo3NQlo-bhfBjzHkIhhS21JR3ZtMgnhexbIEjA3j3uY"/>
+</div>
+<h1 class="font-lexend tracking-tight text-xl font-bold text-cyan-400 uppercase tracking-widest">Workout Buddy</h1>
+</div>
+<button class="text-cyan-400 hover:bg-cyan-900/20 transition-colors p-2 rounded-lg active:scale-95 duration-200">
+<span class="material-symbols-outlined">settings</span>
+</button>
+</header>
+<main class="pt-24 px-margin max-w-7xl mx-auto">
+<!-- Dashboard Header -->
+<div class="mb-lg">
+<p class="font-label-sm text-primary mb-xs">PERFORMANCE HUB</p>
+<h2 class="font-headline-lg text-on-surface">Weekly Analytics</h2>
+</div>
+<!-- Bento Grid Layout -->
+<div class="grid grid-cols-1 md:grid-cols-12 gap-gutter">
+<!-- Last Workout Hero (Large) -->
+<section class="md:col-span-8 glass-card rounded-xl p-md flex flex-col justify-between min-h-[320px] relative overflow-hidden group">
+<div class="absolute top-0 right-0 p-lg opacity-10 pointer-events-none group-hover:opacity-20 transition-opacity">
+<span class="material-symbols-outlined text-[120px]" style="font-variation-settings: 'FILL' 1;">fitness_center</span>
+</div>
+<div>
+<div class="flex items-center gap-base mb-sm">
+<span class="px-3 py-1 rounded-full bg-primary-container text-on-primary-container font-label-sm">LATEST SESSION</span>
+<span class="text-on-surface-variant font-label-md">Yesterday, 6:45 PM</span>
+</div>
+<h3 class="font-headline-md text-on-surface mb-lg">Hypertrophy: Upper Body A</h3>
+<div class="grid grid-cols-3 gap-md">
+<div class="space-y-xs">
+<p class="font-label-sm text-on-surface-variant">TIME</p>
+<p class="font-headline-md text-primary">54:12</p>
+<p class="font-body-sm text-on-surface-variant flex items-center gap-1">
+<span class="material-symbols-outlined text-[14px]">trending_up</span> +4m avg
+                            </p>
+</div>
+<div class="space-y-xs">
+<p class="font-label-sm text-on-surface-variant">VOLUME</p>
+<p class="font-headline-md text-primary">12,450 kg</p>
+<p class="font-body-sm text-on-surface-variant flex items-center gap-1">
+<span class="material-symbols-outlined text-[14px]">arrow_upward</span> PR
+                            </p>
+</div>
+<div class="space-y-xs">
+<p class="font-label-sm text-on-surface-variant">FEEL</p>
+<div class="flex items-center gap-1 text-primary">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">bolt</span>
+<p class="font-headline-md">High</p>
+</div>
+<p class="font-body-sm text-on-surface-variant">Steady Focus</p>
+</div>
+</div>
+</div>
+<button class="mt-lg w-fit flex items-center gap-base text-primary font-label-lg group/btn">
+                    View full workout details 
+                    <span class="material-symbols-outlined text-md group-hover/btn:translate-x-1 transition-transform">arrow_forward</span>
+</button>
+</section>
+<!-- Quick Stats Column -->
+<aside class="md:col-span-4 space-y-gutter">
+<div class="glass-card rounded-xl p-md flex flex-col justify-center">
+<p class="font-label-sm text-on-surface-variant mb-base">CURRENT STREAK</p>
+<div class="flex items-end gap-sm">
+<span class="font-headline-xl text-primary leading-none">12</span>
+<span class="font-label-lg text-on-surface-variant mb-2">DAYS</span>
+</div>
+</div>
+<div class="glass-card rounded-xl p-md flex items-center gap-md">
+<div class="w-12 h-12 rounded-full bg-secondary-container/30 flex items-center justify-center text-secondary">
+<span class="material-symbols-outlined">social_leaderboard</span>
+</div>
+<div>
+<p class="font-label-sm text-on-surface-variant">RANKING</p>
+<p class="font-label-lg text-on-surface">Top 3% Locally</p>
+</div>
+</div>
+</aside>
+<!-- Workouts per Week Chart (Medium) -->
+<section class="md:col-span-5 glass-card rounded-xl p-md">
+<div class="flex justify-between items-start mb-lg">
+<h4 class="font-label-lg text-on-surface">Workouts per Week</h4>
+<span class="material-symbols-outlined text-on-surface-variant">calendar_today</span>
+</div>
+<div class="h-48 flex items-end justify-between gap-base px-xs">
+<div class="flex flex-col items-center gap-sm flex-1">
+<div class="w-full bg-cyan-900/20 rounded-t-sm h-[40%] transition-all hover:bg-cyan-500/40"></div>
+<span class="font-label-sm text-on-surface-variant">M</span>
+</div>
+<div class="flex flex-col items-center gap-sm flex-1">
+<div class="w-full bg-cyan-500/60 rounded-t-sm h-[85%] transition-all hover:bg-cyan-500/80"></div>
+<span class="font-label-sm text-on-surface-variant">T</span>
+</div>
+<div class="flex flex-col items-center gap-sm flex-1">
+<div class="w-full bg-cyan-900/20 rounded-t-sm h-[20%] transition-all hover:bg-cyan-500/40"></div>
+<span class="font-label-sm text-on-surface-variant">W</span>
+</div>
+<div class="flex flex-col items-center gap-sm flex-1">
+<div class="w-full bg-cyan-500/60 rounded-t-sm h-[95%] transition-all hover:bg-cyan-500/80"></div>
+<span class="font-label-sm text-on-surface-variant">T</span>
+</div>
+<div class="flex flex-col items-center gap-sm flex-1">
+<div class="w-full bg-cyan-900/20 rounded-t-sm h-[10%] transition-all hover:bg-cyan-500/40"></div>
+<span class="font-label-sm text-on-surface-variant">F</span>
+</div>
+<div class="flex flex-col items-center gap-sm flex-1">
+<div class="w-full bg-cyan-500/60 rounded-t-sm h-[75%] transition-all hover:bg-cyan-500/80"></div>
+<span class="font-label-sm text-on-surface-variant">S</span>
+</div>
+<div class="flex flex-col items-center gap-sm flex-1">
+<div class="w-full bg-cyan-900/20 rounded-t-sm h-[0%] transition-all hover:bg-cyan-500/40"></div>
+<span class="font-label-sm text-on-surface-variant">S</span>
+</div>
+</div>
+</section>
+<!-- Progress Trends (Medium) -->
+<section class="md:col-span-7 glass-card rounded-xl p-md">
+<div class="flex justify-between items-start mb-lg">
+<div>
+<h4 class="font-label-lg text-on-surface">Strength Progress</h4>
+<p class="font-body-sm text-on-surface-variant">Aggregated Bench &amp; Deadlift</p>
+</div>
+<select class="bg-surface-container-high border-none text-on-surface font-label-sm rounded-lg py-1 px-3 focus:ring-1 focus:ring-primary">
+<option>Last 30 Days</option>
+<option>Last 3 Months</option>
+</select>
+</div>
+<div class="h-48 relative w-full overflow-hidden">
+<!-- SVG Chart simulation -->
+<svg class="w-full h-full overflow-visible" preserveaspectratio="none" viewbox="0 0 400 150">
+<defs>
+<lineargradient id="line-grad" x1="0%" x2="0%" y1="0%" y2="100%">
+<stop offset="0%" stop-color="#4cd6ff" stop-opacity="0.3"></stop>
+<stop offset="100%" stop-color="#4cd6ff" stop-opacity="0"></stop>
+</lineargradient>
+</defs>
+<path d="M0,130 C40,120 80,140 120,100 C160,60 200,90 240,50 C280,10 320,40 360,20 L400,10 L400,150 L0,150 Z" fill="url(#line-grad)"></path>
+<path d="M0,130 C40,120 80,140 120,100 C160,60 200,90 240,50 C280,10 320,40 360,20 L400,10" fill="none" stroke="#4cd6ff" stroke-width="3"></path>
+<!-- PR Marker -->
+<circle cx="360" cy="20" fill="#4cd6ff" r="4"></circle>
+</svg>
+<div class="absolute top-2 right-12 bg-surface-container-highest border border-primary/30 px-2 py-1 rounded text-[10px] font-label-sm">
+                        NEW PR: 245kg
+                    </div>
+</div>
+<div class="flex justify-between mt-sm">
+<span class="font-label-sm text-on-surface-variant">AUG 12</span>
+<span class="font-label-sm text-on-surface-variant">TODAY</span>
+</div>
+</section>
+<!-- Bottom Row: Focus Areas -->
+<section class="md:col-span-12 grid grid-cols-1 md:grid-cols-3 gap-gutter">
+<div class="glass-card rounded-xl p-md border-l-4 border-l-error">
+<h5 class="font-label-md text-on-surface mb-base">RECOVERY ALERT</h5>
+<p class="font-body-sm text-on-surface-variant mb-sm">Sleep quality dropped by 18% this week. Consider a deload session tomorrow.</p>
+<div class="w-full h-1 bg-surface-container-highest rounded-full overflow-hidden">
+<div class="w-1/3 h-full bg-error"></div>
+</div>
+</div>
+<div class="glass-card rounded-xl p-md border-l-4 border-l-primary">
+<h5 class="font-label-md text-on-surface mb-base">NUTRITION GOAL</h5>
+<p class="font-body-sm text-on-surface-variant mb-sm">Protein intake is on target for muscle synthesis. Maintain 180g/day.</p>
+<div class="w-full h-1 bg-surface-container-highest rounded-full overflow-hidden">
+<div class="w-[92%] h-full bg-primary"></div>
+</div>
+</div>
+<div class="glass-card rounded-xl p-md border-l-4 border-l-secondary">
+<h5 class="font-label-md text-on-surface mb-base">TECHNIQUE FOCUS</h5>
+<p class="font-body-sm text-on-surface-variant mb-sm">Last Squat session showed slight forward lean. Adjust foot placement.</p>
+<button class="font-label-sm text-secondary hover:underline">See Video Breakdown</button>
+</div>
+</section>
+</div>
+</main>
+<!-- BottomNavBar from JSON -->
+<nav class="fixed bottom-0 w-full z-50 rounded-t-2xl bg-slate-950/90 backdrop-blur-xl border-t border-cyan-900/30 shadow-[0_-4px_20px_rgba(0,0,0,0.4)] flex justify-around items-center h-20 px-4 pb-2">
+<div class="flex flex-col items-center justify-center text-slate-500 hover:text-cyan-300 active:scale-90 transition-transform cursor-pointer">
+<span class="material-symbols-outlined">calendar_today</span>
+<span class="font-lexend text-[10px] uppercase font-semibold">Plan</span>
+</div>
+<div class="flex flex-col items-center justify-center text-slate-500 hover:text-cyan-300 active:scale-90 transition-transform cursor-pointer">
+<span class="material-symbols-outlined">fitness_center</span>
+<span class="font-lexend text-[10px] uppercase font-semibold">Workout</span>
+</div>
+<div class="flex flex-col items-center justify-center text-slate-500 hover:text-cyan-300 active:scale-90 transition-transform cursor-pointer">
+<span class="material-symbols-outlined">chat_bubble</span>
+<span class="font-lexend text-[10px] uppercase font-semibold">Feed</span>
+</div>
+<div class="flex flex-col items-center justify-center text-cyan-400 bg-cyan-500/10 rounded-xl px-3 py-1 active:scale-90 transition-transform cursor-pointer">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">insights</span>
+<span class="font-lexend text-[10px] uppercase font-semibold">Stats</span>
+</div>
+</nav>
+<!-- Floating Action Button Contextual Check: Supressed for Report Screen as per rules -->
+</body></html>

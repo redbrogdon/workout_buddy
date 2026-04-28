@@ -21,9 +21,7 @@ class HistoryNotifier extends Notifier<List<WorkoutSessionRecord>> {
   StorageService get _storage => ref.read(storageServiceProvider);
 
   @override
-  List<WorkoutSessionRecord> build() {
-    return [];
-  }
+  List<WorkoutSessionRecord> build() => [];
 
   Future<void> load() async {
     state = await _storage.readHistory();
@@ -45,9 +43,7 @@ class PreferencesNotifier extends Notifier<UserPreferences> {
   StorageService get _storage => ref.read(storageServiceProvider);
 
   @override
-  UserPreferences build() {
-    return UserPreferences(description: '');
-  }
+  UserPreferences build() => UserPreferences();
 
   Future<void> load() async {
     state = await _storage.readPreferences();

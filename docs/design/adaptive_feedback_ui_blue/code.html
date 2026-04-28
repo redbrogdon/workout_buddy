@@ -1,0 +1,243 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Workout Buddy - Adaptive Feedback</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Lexend:wght@100..900&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            "colors": {
+                "inverse-on-surface": "#2b3139",
+                "on-tertiary-fixed": "#0d1c32",
+                "on-primary": "#003543",
+                "tertiary-fixed": "#d6e3ff",
+                "surface-dim": "#0e141b",
+                "outline-variant": "#3c494e",
+                "surface-container-highest": "#30353d",
+                "inverse-surface": "#dee2ed",
+                "surface-tint": "#4cd6ff",
+                "primary-fixed-dim": "#4cd6ff",
+                "background": "#0e141b",
+                "on-primary-container": "#00566a",
+                "on-secondary": "#003256",
+                "outline": "#859399",
+                "primary-container": "#00d1ff",
+                "secondary-fixed": "#d0e4ff",
+                "secondary-fixed-dim": "#9ccaff",
+                "error": "#ffb4ab",
+                "on-error": "#690005",
+                "surface-container-lowest": "#090e16",
+                "surface-container-high": "#252a32",
+                "primary": "#a4e6ff",
+                "surface-container": "#1b2028",
+                "secondary": "#9ccaff",
+                "on-tertiary": "#233148",
+                "surface-variant": "#30353d",
+                "on-surface-variant": "#bbc9cf",
+                "on-tertiary-container": "#414f68",
+                "secondary-container": "#005a95",
+                "on-primary-fixed-variant": "#004e60",
+                "tertiary": "#cfddfb",
+                "on-secondary-fixed": "#001d35",
+                "surface-bright": "#343942",
+                "inverse-primary": "#00677f",
+                "on-secondary-fixed-variant": "#00497a",
+                "on-background": "#dee2ed",
+                "tertiary-container": "#b3c1de",
+                "on-primary-fixed": "#001f28",
+                "on-secondary-container": "#a9d1ff",
+                "primary-fixed": "#b7eaff",
+                "on-error-container": "#ffdad6",
+                "on-surface": "#dee2ed",
+                "surface": "#0e141b",
+                "surface-container-low": "#171c24",
+                "error-container": "#93000a",
+                "on-tertiary-fixed-variant": "#39475f",
+                "tertiary-fixed-dim": "#b9c7e4"
+            },
+            "borderRadius": {
+                "DEFAULT": "0.125rem",
+                "lg": "0.25rem",
+                "xl": "0.5rem",
+                "full": "0.75rem"
+            },
+            "spacing": {
+                "xl": "80px",
+                "margin": "32px",
+                "sm": "12px",
+                "base": "8px",
+                "lg": "48px",
+                "xs": "4px",
+                "gutter": "24px",
+                "md": "24px"
+            },
+            "fontFamily": {
+                "label-md": ["Lexend"],
+                "headline-xl": ["Lexend"],
+                "label-lg": ["Lexend"],
+                "headline-lg": ["Lexend"],
+                "label-sm": ["Lexend"],
+                "body-sm": ["Lexend"],
+                "headline-md": ["Lexend"],
+                "body-lg": ["Lexend"],
+                "body-md": ["Lexend"]
+            },
+            "fontSize": {
+                "label-md": ["12px", {"lineHeight": "14px", "letterSpacing": "0.05em", "fontWeight": "500"}],
+                "headline-xl": ["48px", {"lineHeight": "56px", "letterSpacing": "-0.02em", "fontWeight": "700"}],
+                "label-lg": ["14px", {"lineHeight": "16px", "letterSpacing": "0.05em", "fontWeight": "600"}],
+                "headline-lg": ["32px", {"lineHeight": "40px", "letterSpacing": "-0.01em", "fontWeight": "600"}],
+                "label-sm": ["10px", {"lineHeight": "12px", "letterSpacing": "0.08em", "fontWeight": "700"}],
+                "body-sm": ["14px", {"lineHeight": "20px", "fontWeight": "400"}],
+                "headline-md": ["24px", {"lineHeight": "32px", "fontWeight": "600"}],
+                "body-lg": ["18px", {"lineHeight": "28px", "fontWeight": "400"}],
+                "body-md": ["16px", {"lineHeight": "24px", "fontWeight": "400"}]
+            }
+          }
+        }
+      }
+    </script>
+<style>
+        .glass-panel {
+            background: rgba(14, 20, 27, 0.6);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(0, 209, 255, 0.2);
+        }
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-background text-on-background font-body-md min-h-screen">
+<!-- Top App Bar -->
+<header class="fixed top-0 w-full z-50 bg-slate-950/80 backdrop-blur-md border-b border-cyan-900/50 flex justify-between items-center px-6 h-16 shadow-[0_0_15px_rgba(0,209,255,0.05)]">
+<div class="flex items-center gap-3">
+<div class="w-10 h-10 rounded-full border border-cyan-500/30 overflow-hidden">
+<img alt="User Profile" class="w-full h-full object-cover" data-alt="Close up portrait of a focused athletic man in a dark gym environment with cyan rim lighting" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAX8vFmmvcBDdqP8d_KJScR4pg1OoJJ8e5Cc0oPeTSrAMskiTLZEXOMMfVYMgfK9Ds-CHWFCkU-9cDed3NhKONTrEqqV80EOj57FrNIy7AOwzguBrIoYb1AllvzTCW865dnwGI0WkB-ojMMulgRp-hLp-ou554U14J1uhlT-8oxEhsg802sf5gY-w3VylQhJUy4SUzCyG-rGZbJWzJzMUnCuVChEjbqgD-YyVPflsYa7BX0xEMfSY6r0HpSnQlASMsZjEDBtUG3U-I"/>
+</div>
+<h1 class="font-lexend tracking-tight text-xl font-bold text-cyan-400 uppercase tracking-widest">Workout Buddy</h1>
+</div>
+<button class="text-slate-400 hover:bg-cyan-900/20 transition-colors p-2 rounded-xl active:scale-95 duration-200">
+<span class="material-symbols-outlined" data-icon="settings">settings</span>
+</button>
+</header>
+<!-- Main Content Canvas (Focused Background UI) -->
+<main class="pt-24 pb-32 px-margin max-w-4xl mx-auto space-y-gutter">
+<!-- Training Summary Behind Modal -->
+<div class="space-y-sm opacity-40 grayscale">
+<div class="glass-panel p-md rounded-xl">
+<p class="text-cyan-400 font-label-sm uppercase">Current Exercise</p>
+<h2 class="font-headline-md text-on-surface">Barbell Back Squats</h2>
+<div class="grid grid-cols-3 gap-md mt-md">
+<div class="bg-surface-container p-sm rounded-lg border border-outline-variant/30">
+<p class="text-label-sm text-on-surface-variant">SET 3</p>
+<p class="text-headline-md font-bold">100<span class="text-label-md ml-xs">kg</span></p>
+</div>
+<div class="bg-surface-container p-sm rounded-lg border border-outline-variant/30">
+<p class="text-label-sm text-on-surface-variant">REPS</p>
+<p class="text-headline-md font-bold">8</p>
+</div>
+<div class="bg-surface-container p-sm rounded-lg border border-outline-variant/30">
+<p class="text-label-sm text-on-surface-variant">RPE</p>
+<p class="text-headline-md font-bold">--</p>
+</div>
+</div>
+</div>
+</div>
+<!-- Adaptive Feedback Modal Overlay -->
+<div class="fixed inset-0 z-50 flex items-center justify-center p-gutter bg-slate-950/60 backdrop-blur-sm">
+<div class="glass-panel w-full max-w-md p-lg rounded-xl shadow-[0_0_40px_rgba(0,209,255,0.15)] relative overflow-hidden">
+<!-- Background Decorative Glow -->
+<div class="absolute -top-24 -right-24 w-48 h-48 bg-primary/10 rounded-full blur-3xl"></div>
+<!-- Content -->
+<div class="relative z-10 text-center space-y-lg">
+<div class="space-y-xs">
+<span class="inline-flex items-center gap-base px-sm py-xs bg-cyan-500/10 text-cyan-400 rounded-full font-label-sm border border-cyan-500/20">
+<span class="material-symbols-outlined text-[14px]" data-icon="bolt" style="font-variation-settings: 'FILL' 1;">bolt</span>
+                            ADAPTIVE FEEDBACK
+                        </span>
+<h3 class="font-headline-lg text-on-surface">How was that last set?</h3>
+<p class="text-body-md text-on-surface-variant">We'll adjust your next target weights based on your input.</p>
+</div>
+<!-- Feedback Options -->
+<div class="grid grid-cols-1 gap-md">
+<!-- Too Easy -->
+<button class="group flex items-center justify-between p-md rounded-xl bg-surface-container border border-outline-variant/50 hover:border-cyan-400/50 hover:bg-cyan-900/10 transition-all active:scale-95">
+<div class="flex items-center gap-md">
+<div class="w-12 h-12 flex items-center justify-center rounded-lg bg-surface-container-highest group-hover:bg-cyan-500/20 text-on-surface-variant group-hover:text-cyan-400">
+<span class="material-symbols-outlined text-3xl" data-icon="speed">speed</span>
+</div>
+<div class="text-left">
+<p class="font-label-lg text-on-surface">Too Easy</p>
+<p class="text-label-sm text-on-surface-variant">I can do 2+ more reps</p>
+</div>
+</div>
+<span class="material-symbols-outlined text-cyan-500/0 group-hover:text-cyan-400 transition-colors" data-icon="chevron_right">chevron_right</span>
+</button>
+<!-- Just Right -->
+<button class="group flex items-center justify-between p-md rounded-xl bg-primary-container text-on-primary-container border border-cyan-400 shadow-[0_0_15px_rgba(0,209,255,0.2)] active:scale-95">
+<div class="flex items-center gap-md">
+<div class="w-12 h-12 flex items-center justify-center rounded-lg bg-on-primary-container/10">
+<span class="material-symbols-outlined text-3xl" data-icon="check_circle" style="font-variation-settings: 'FILL' 1;">check_circle</span>
+</div>
+<div class="text-left">
+<p class="font-label-lg font-bold uppercase tracking-tight">Just Right</p>
+<p class="text-label-sm opacity-80">Hit targets with good form</p>
+</div>
+</div>
+<span class="material-symbols-outlined" data-icon="keyboard_double_arrow_right">keyboard_double_arrow_right</span>
+</button>
+<!-- Too Hard -->
+<button class="group flex items-center justify-between p-md rounded-xl bg-surface-container border border-outline-variant/50 hover:border-error/50 hover:bg-error-container/10 transition-all active:scale-95">
+<div class="flex items-center gap-md">
+<div class="w-12 h-12 flex items-center justify-center rounded-lg bg-surface-container-highest group-hover:bg-error-container text-on-surface-variant group-hover:text-error">
+<span class="material-symbols-outlined text-3xl" data-icon="warning">warning</span>
+</div>
+<div class="text-left">
+<p class="font-label-lg text-on-surface">Too Hard</p>
+<p class="text-label-sm text-on-surface-variant">Struggled to finish set</p>
+</div>
+</div>
+<span class="material-symbols-outlined text-error/0 group-hover:text-error transition-colors" data-icon="chevron_right">chevron_right</span>
+</button>
+</div>
+<button class="font-label-md text-on-surface-variant hover:text-on-surface transition-colors uppercase tracking-widest pt-sm">
+                        SKIP FOR NOW
+                    </button>
+</div>
+</div>
+</div>
+</main>
+<!-- Bottom Navigation Bar (Suppressed on focused journey, but implemented as requested by shell logic) -->
+<!-- The prompt implies a focused task 'modal', so it might be hidden, but following instructions to provide components -->
+<nav class="fixed bottom-0 w-full z-50 rounded-t-2xl bg-slate-950/90 backdrop-blur-xl border-t border-cyan-900/30 flex justify-around items-center h-20 px-4 pb-2 shadow-[0_-4px_20px_rgba(0,0,0,0.4)]">
+<div class="flex flex-col items-center justify-center text-slate-500 hover:text-cyan-300 active:scale-90 transition-transform">
+<span class="material-symbols-outlined mb-1" data-icon="calendar_today">calendar_today</span>
+<span class="font-lexend text-[10px] uppercase font-semibold">Plan</span>
+</div>
+<div class="flex flex-col items-center justify-center text-cyan-400 bg-cyan-500/10 rounded-xl px-3 py-1 active:scale-90 transition-transform">
+<span class="material-symbols-outlined mb-1" data-icon="fitness_center" style="font-variation-settings: 'FILL' 1;">fitness_center</span>
+<span class="font-lexend text-[10px] uppercase font-semibold">Workout</span>
+</div>
+<div class="flex flex-col items-center justify-center text-slate-500 hover:text-cyan-300 active:scale-90 transition-transform">
+<span class="material-symbols-outlined mb-1" data-icon="chat_bubble">chat_bubble</span>
+<span class="font-lexend text-[10px] uppercase font-semibold">Feed</span>
+</div>
+<div class="flex flex-col items-center justify-center text-slate-500 hover:text-cyan-300 active:scale-90 transition-transform">
+<span class="material-symbols-outlined mb-1" data-icon="insights">insights</span>
+<span class="font-lexend text-[10px] uppercase font-semibold">Stats</span>
+</div>
+</nav>
+</body></html>

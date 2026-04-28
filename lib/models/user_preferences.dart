@@ -2,7 +2,7 @@ class UserPreferences {
   final String description;
 
   UserPreferences({
-    required this.description,
+    this.description = '',
   });
 
   Map<String, dynamic> toJson() {

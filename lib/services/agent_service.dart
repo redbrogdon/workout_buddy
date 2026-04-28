@@ -3,7 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:firebase_ai/firebase_ai.dart' as firebase_ai;
 import 'package:genai_primitives/genai_primitives.dart' as genai;
 import 'package:logging/logging.dart';
-import '../tools/storage_tools.dart';
+import '../providers/storage_tools.dart';
 
 /// Abstract interface for the workout agent service.
 /// Decoupled from genui-specific concepts like Transport.

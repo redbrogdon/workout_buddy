@@ -1,6 +1,6 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:firebase_ai/firebase_ai.dart';
-import '../providers/storage_providers.dart';
+import 'storage_providers.dart';
 import '../models/workout_session.dart';
 
 final storageToolsProvider = Provider<List<Tool>>((ref) {
