@@ -63,9 +63,8 @@ class MyApp extends StatelessWidget {
     return MaterialApp(
       title: 'Workout Buddy',
       debugShowCheckedModeBanner: false,
-      theme: WorkoutBuddyTheme.light,
-      darkTheme: WorkoutBuddyTheme.dark,
-      themeMode: ThemeMode.system,
+      themeMode: ThemeMode.dark,
+      darkTheme: CeruleanEdgeTheme.dark,
       home: const MainShell(),
     );
   }
