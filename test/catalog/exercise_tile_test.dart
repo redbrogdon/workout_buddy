@@ -24,7 +24,7 @@ void main() {
       ),
     );
 
-    expect(find.text('Pushups'), findsOneWidget);
+    expect(find.text('PUSHUPS'), findsOneWidget);
     expect(find.text('3 sets of 10 reps'), findsOneWidget);
   });
 

@@ -98,32 +98,102 @@ class ExerciseTile extends StatelessWidget {
     required this.onReplace,
   });
 
+  String _getImageForExercise(String exerciseName) {
+    final name = exerciseName.toLowerCase();
+    if (name.contains('push')) return 'assets/images/pushup.png';
+    if (name.contains('squat')) return 'assets/images/squat.png';
+    if (name.contains('plank')) return 'assets/images/plank.png';
+    return 'assets/images/pushup.png'; // Fallback
+  }
+
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final imagePath = _getImageForExercise(data.name);
+
     String subtitle = '';
     if (data.sets != null) subtitle += '${data.sets} sets ';
     if (data.repetitions != null) subtitle += 'of ${data.repetitions} reps';
     if (data.duration != null) subtitle += 'for ${data.duration}s';
+    subtitle = subtitle.trim();
 
-    return ListTile(
-      leading: const CircleAvatar(child: Icon(Icons.fitness_center)),
-      title: Text(
-        data.name,
-        style: const TextStyle(fontWeight: FontWeight.bold),
-      ),
-      subtitle: Text(subtitle.trim()),
-      trailing: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          IconButton(
-            icon: const Icon(Icons.swap_horiz, color: Colors.blue),
-            onPressed: onReplace,
-            tooltip: 'Replace',
+    return Container(
+      margin: const EdgeInsets.symmetric(vertical: 8.0, horizontal: 16.0),
+      height: 140,
+      decoration: BoxDecoration(
+        color: theme.colorScheme.surface,
+        borderRadius: BorderRadius.circular(4.0),
+        image: DecorationImage(
+          image: AssetImage(imagePath),
+          fit: BoxFit.cover,
+          colorFilter: ColorFilter.mode(
+            theme.colorScheme.surface.withValues(alpha: 0.6),
+            BlendMode.darken,
           ),
-          IconButton(
-            icon: const Icon(Icons.delete_outline, color: Colors.red),
-            onPressed: onDelete,
-            tooltip: 'Delete',
+        ),
+      ),
+      child: Stack(
+        children: [
+          Container(
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(4.0),
+              gradient: LinearGradient(
+                colors: [
+                  theme.colorScheme.surface,
+                  theme.colorScheme.surface.withValues(alpha: 0.2),
+                  Colors.transparent,
+                ],
+                begin: Alignment.centerLeft,
+                end: Alignment.centerRight,
+              ),
+            ),
+          ),
+          Padding(
+            padding: const EdgeInsets.all(20.0),
+            child: Row(
+              children: [
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Text(
+                        data.name.toUpperCase(),
+                        style: theme.textTheme.headlineMedium?.copyWith(
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      if (subtitle.isNotEmpty) ...[
+                        const SizedBox(height: 4),
+                        Text(
+                          subtitle,
+                          style: theme.textTheme.bodyMedium?.copyWith(
+                            color: theme.colorScheme.onSurfaceVariant,
+                          ),
+                        ),
+                      ],
+                    ],
+                  ),
+                ),
+                Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    IconButton(
+                      icon: const Icon(Icons.swap_horiz),
+                      color: theme.colorScheme.primary,
+                      onPressed: onReplace,
+                      tooltip: 'Replace',
+                    ),
+                    IconButton(
+                      icon: const Icon(Icons.delete_outline),
+                      color: theme.colorScheme.error,
+                      onPressed: onDelete,
+                      tooltip: 'Delete',
+                    ),
+                  ],
+                ),
+              ],
+            ),
           ),
         ],
       ),

@@ -45,6 +45,7 @@ Once the workout begins, the Agent **removes the `WorkoutCard`** and transitions
 The agent uses the following custom components from the `workoutBuddyCatalog`:
 
 ### Planning Components
+*   **AiCoachProposalCard**: Displays the conversational proposal or introductory text from the AI coach.
 *   **WorkoutCard**: High-level summary of the session plan. Includes an "onStart" action to begin the workout.
 *   **ExerciseTile**: Interactive tile for individual exercises during negotiation (supports delete/replace).
 

@@ -20,13 +20,15 @@ void main() {
         ),
       );
 
-      expect(find.text('Full Body Blast'), findsOneWidget);
-      expect(find.text('10 Pushups'), findsOneWidget);
-      expect(find.text('20 Squats'), findsOneWidget);
-      expect(find.text('30s Plank'), findsOneWidget);
+      expect(find.text('FULL BODY BLAST'), findsOneWidget);
+      expect(find.text('10 PUSHUPS'), findsOneWidget);
+      expect(find.text('20 SQUATS'), findsOneWidget);
+      expect(find.text('30S PLANK'), findsOneWidget);
 
-      // Verify number of chips
-      expect(find.byType(Chip), findsNWidgets(3));
+      // Verify number of stacked exercise cards by finding 'EXERCISE 01', etc.
+      expect(find.text('EXERCISE 01'), findsOneWidget);
+      expect(find.text('EXERCISE 02'), findsOneWidget);
+      expect(find.text('EXERCISE 03'), findsOneWidget);
     });
   });
 }

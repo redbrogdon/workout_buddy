@@ -8,6 +8,12 @@ This document describes the data required for each custom UI component available
 
 ## Workout Buddy Components
 
+### AiCoachProposalCard
+Displays the conversational proposal or introductory text from the AI coach during the planning phase.
+*   **Role:** Introductory chat bubble from the AI.
+*   **Fields:**
+    - `proposal` (string): The conversational proposal or introductory text.
+
 ### WorkoutCard
 Displays the overall draft workout plan during the planning phase.
 *   **Role:** High-level summary of the session.
