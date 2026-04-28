@@ -57,6 +57,13 @@ Used for active guidance during repetition-based exercises (e.g., Pushups).
     - `isCompleted` (boolean): Whether the set is finished.
     - `onComplete` (action): Dispatched upon recording reps.
 
+### AdaptiveFeedbackCard
+Displays an interactive UI to ask the user about the difficulty of the last exercise.
+*   **Role:** Solicits qualitative feedback during execution.
+*   **Fields:**
+    - `exercise` (string): The exercise that just completed.
+    - `onFeedback` (action): Dispatched when the user clicks a feedback button ("Too Easy", "Just Right", "Too Hard").
+
 ### SessionSummary
 A dashboard tracking overall session progress.
 *   **Role:** Pinned at the top of the workout screen during the execution phase.

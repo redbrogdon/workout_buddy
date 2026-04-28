@@ -8,6 +8,7 @@ import 'report_widgets.dart';
 
 import 'ai_proposal_card.dart';
 import 'active_workout_widgets.dart';
+import 'adaptive_feedback_card.dart';
 
 final workoutBuddyCatalog = BasicCatalogItems.asCatalog().copyWith(
   newItems: [
@@ -18,6 +19,7 @@ final workoutBuddyCatalog = BasicCatalogItems.asCatalog().copyWith(
     exerciseTile,
     sessionSummary,
     estimatedCaloriesCard,
+    adaptiveFeedbackCard,
     barChart,
     summaryCard,
   ],
