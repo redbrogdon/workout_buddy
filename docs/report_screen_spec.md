@@ -14,21 +14,24 @@ The goal for the agent is to make sure the user has useful and interesting infor
 ### Tools
 The agent should have access to tools that allow it to:
 
-* Query workout data stored on the device.
+* Query workout data stored on the device via `readHistory`.
 
-To display data, the agent should choose the appropriate visualization component (Bar Chart or Line Graph) from the [Catalog](catalog_schemas.md).
+To display data, the agent outputs a comprehensive dashboard using the Performance Hub components from the [Catalog](catalog_schemas.md).
 
 ### Process
-When first opened, the report screen should display information about their recent workouts (the last week, unless the user has indicated they prefer a different timeframe). This could include the number of workouts on each day, the total length of time spent exercising on each day, or the types and frequency of exercises (possibly sorted by body part or major muscle group).
+When first opened, the report screen should display a complete Performance Hub dashboard. This dashboard includes the latest session details, current streaks, percentile rankings, a weekly visual calendar, progress charts, and actionable coaching insights. The agent synthesizes this dashboard using the user's history data.
 
 ## UI Components (the catalog of components the agent can use)
 See [Catalog Schemas](catalog_schemas.md) for technical definitions of these components.
 
 The agent should have access to the `genui` package's Basic Catalog and the following custom components:
 
-* Bar chart: A bar chart component that displays labelled amounts using vertical or horizontal  bars. The component should include a title and an optional description of the data. The description could either summarize the data or explain what the user is seeing.
-* Line graph: A series of data points spread horizontally, with a line connecting them. Both axes should be labelled, and this component should also include a title and optional description.
-* Summary card: A text-based card that displays a title and markdown-formatted text.
+* LatestSessionCard: Summarizes the duration, calories, and exercise count for the user's most recent workout.
+* StreakWidget: Displays the user's current consecutive daily workout streak.
+* RankingWidget: Displays a motivational percentile ranking compared to other users.
+* WeeklyCalendarWidget: Provides a visual calendar row showing which days the user worked out in the current week.
+* ProgressChartWidget: A line chart displaying recent progress, such as calories burned or duration over the last 7 days.
+* InsightAlertCard: A card providing a coaching tip, recovery advice, or specific insight based on the user's recent history.
 
 The agent should create a UI component from the catalog for each type of information it chooses to display. If it decides to display both frequency of workouts, time spent per day working out, and a text-based summary of recent activity, those would be three separate UI components.
 
