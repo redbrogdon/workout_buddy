@@ -20,7 +20,11 @@ final workoutBuddyCatalog = BasicCatalogItems.asCatalog().copyWith(
     sessionSummary,
     estimatedCaloriesCard,
     adaptiveFeedbackCard,
-    barChart,
-    summaryCard,
+    latestSessionCard,
+    streakWidget,
+    rankingWidget,
+    weeklyCalendarWidget,
+    progressChartWidget,
+    insightAlertCard,
   ],
 );

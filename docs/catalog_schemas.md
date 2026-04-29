@@ -82,25 +82,44 @@ Displays the estimated calories burned after the workout session is complete.
 
 ## Reporting Components
 
-### BarChart
-A vertical bar chart for performance visualization.
+### LatestSessionCard
+Summarizes the most recent workout session.
+*   **Role:** Performance Dashboard.
 *   **Fields:**
-    - `title` (string): Title of the chart.
-    - `description` (optional string): Context for the data.
-    - `labels` (list of strings): Labels for each bar (e.g., days of the week).
-    - `values` (list of numbers): Numeric values for each bar.
+    - `title` (string): Title of the card.
+    - `duration` (integer): Duration in minutes.
+    - `calories` (integer): Calories burned.
+    - `exercises` (integer): Number of exercises completed.
 
-### LineGraph
-A horizontal line chart for progress trends.
+### StreakWidget
+Displays the user's current workout streak.
+*   **Role:** Performance Dashboard.
 *   **Fields:**
-    - `title` (string): Title of the graph.
-    - `description` (optional string): Context for the data.
-    - `xAxisLabel` (string): Label for time/session axis.
-    - `yAxisLabel` (string): Label for value/volume axis.
-    - `dataPoints` (list of numbers): Values to be connected by the line.
+    - `streakCount` (integer): Current day streak.
 
-### SummaryCard
-A text-based narrative card for reports.
+### RankingWidget
+Displays a motivational percentile ranking.
+*   **Role:** Performance Dashboard.
 *   **Fields:**
-    - `title` (string): Title of the summary.
-    - `content` (string): Markdown-formatted coaching insights or narrative.
+    - `percentile` (integer): User percentile ranking.
+
+### WeeklyCalendarWidget
+Shows which days the user worked out this week.
+*   **Role:** Performance Dashboard.
+*   **Fields:**
+    - `completedDays` (list of integers): Days completed (0=Mon, 6=Sun).
+
+### ProgressChartWidget
+Displays a line chart of recent progress (calories or duration).
+*   **Role:** Performance Dashboard.
+*   **Fields:**
+    - `title` (string): Chart title.
+    - `labels` (list of strings): X-axis labels.
+    - `values` (list of numbers): Y-axis values.
+
+### InsightAlertCard
+Provides a coaching tip or recovery advice based on history.
+*   **Role:** Performance Dashboard.
+*   **Fields:**
+    - `title` (string): Insight title.
+    - `insight` (string): The advice content.

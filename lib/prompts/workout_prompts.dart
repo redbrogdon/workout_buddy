@@ -26,7 +26,7 @@ Goal: Lead the user through the plan exercise by exercise.
 2. Display a `SessionSummary` (use `surfaceId: 'summary'`) to track overall
    progress.
    - `totalExercises`: Total number of exercises in the session.
-   - `completedExercises`: Number of exercises **already finished**. 
+   - `completedExercises`: Number of exercises **already finished**.
    - Note: The UI will display "Exercise X of Y" where X is
      `completedExercises + 1`. When `completedExercises == totalExercises`,
      it will show "Workout Complete!".
