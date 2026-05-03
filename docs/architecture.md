@@ -92,8 +92,5 @@ To avoid the cognitive load of a growing chat history, the application leverages
 *   **Workout Screen:** The Agent updates existing surfaces (like the active exercise card or the workout plan) rather than sending new messages.
 
 ### Visual Design
-The application follows a premium, branded design philosophy:
-*   **Theme:** A custom `ThemeData` based on the **Cerulean Edge** aesthetic.
-    - **Colors:** Dark gradient backgrounds with glassmorphic `surfaceContainerHighest` overlays and bright cyan primary accents.
-    - **Typography:** Uses the `google_fonts` package (Lexend) for high-impact, uppercase headings and clear tabular figures.
+The application uses a custom `ThemeData` for its premium, branded design philosophy. For full details on the aesthetic, please refer to the [Design System](design/design.md) documentation.
 *   **Transitions:** Navigation state is preserved using a custom lazy-loading `IndexedStack` to ensure agent conversations are instantly accessible and perfectly maintained without unnecessary initializations.
