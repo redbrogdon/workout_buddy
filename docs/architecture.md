@@ -93,4 +93,5 @@ To avoid the cognitive load of a growing chat history, the application leverages
 
 ### Visual Design
 The application uses a custom `ThemeData` for its premium, branded design philosophy. For full details on the aesthetic, please refer to the [Design System](design/design.md) documentation.
-*   **Transitions:** Navigation state is preserved using a custom lazy-loading `IndexedStack` to ensure agent conversations are instantly accessible and perfectly maintained without unnecessary initializations.
+
+Navigation state is preserved using a custom lazy-loading `IndexedStack` to ensure agent conversations are instantly accessible and perfectly maintained without unnecessary initializations.
