@@ -93,8 +93,7 @@ To avoid the cognitive load of a growing chat history, the application leverages
 
 ### Visual Design
 The application follows a premium, branded design philosophy:
-*   **Theme:** A custom `ThemeData` inspired by the **Planet Fitness** aesthetic.
-    - **Colors:** Deep Purple (`#6D2077`) for primary actions and Yellow (`#FEB822`) for highlights.
-    - **Mode:** Primarily utilizes a high-contrast dark theme for a focused "gym" feel.
-*   **Typography:** Custom typography system using bold headlines for clarity and refined body text for readability.
-*   **Transitions:** Fluid sliding transitions between screens implemented via `PageView` and `PageController`.
+*   **Theme:** A custom `ThemeData` based on the **Cerulean Edge** aesthetic.
+    - **Colors:** Dark gradient backgrounds with glassmorphic `surfaceContainerHighest` overlays and bright cyan primary accents.
+    - **Typography:** Uses the `google_fonts` package (Lexend) for high-impact, uppercase headings and clear tabular figures.
+*   **Transitions:** Navigation state is preserved using a custom lazy-loading `IndexedStack` to ensure agent conversations are instantly accessible and perfectly maintained without unnecessary initializations.

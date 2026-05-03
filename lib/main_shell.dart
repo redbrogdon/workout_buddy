@@ -12,7 +12,7 @@ class MainShell extends ConsumerStatefulWidget {
 }
 
 class _MainShellState extends ConsumerState<MainShell> {
-  late final PageController _pageController;
+  final List<bool> _hasBeenViewed = [false, false];
 
   static const List<Widget> _screens = [
     WorkoutScreen(),
@@ -25,40 +25,26 @@ class _MainShellState extends ConsumerState<MainShell> {
   ];
 
   @override
-  void initState() {
-    super.initState();
-    _pageController = PageController();
-  }
-
-  @override
-  void dispose() {
-    _pageController.dispose();
-    super.dispose();
-  }
-
-  @override
   Widget build(BuildContext context) {
     final selectedIndex = ref.watch(navigationIndexProvider);
 
-    // Sync PageController if index changed from elsewhere
-    if (_pageController.hasClients &&
-        _pageController.page?.round() != selectedIndex) {
-      _pageController.animateToPage(
-        selectedIndex,
-        duration: const Duration(milliseconds: 400),
-        curve: Curves.easeInOutCubic,
-      );
+    // Guarantee the currently visible tab is marked as viewed
+    if (!_hasBeenViewed[selectedIndex]) {
+      _hasBeenViewed[selectedIndex] = true;
     }
 
     return Scaffold(
       appBar: AppBar(
         title: Text(_titles[selectedIndex]),
       ),
-      body: PageView(
-        controller: _pageController,
-        onPageChanged: (index) =>
-            ref.read(navigationIndexProvider.notifier).setIndex(index),
-        children: _screens,
+      body: IndexedStack(
+        index: selectedIndex,
+        children: List.generate(_screens.length, (index) {
+          if (_hasBeenViewed[index]) {
+            return _screens[index];
+          }
+          return const SizedBox.shrink();
+        }),
       ),
       bottomNavigationBar: BottomNavigationBar(
         items: const <BottomNavigationBarItem>[
@@ -74,11 +60,6 @@ class _MainShellState extends ConsumerState<MainShell> {
         currentIndex: selectedIndex,
         onTap: (index) {
           ref.read(navigationIndexProvider.notifier).setIndex(index);
-          _pageController.animateToPage(
-            index,
-            duration: const Duration(milliseconds: 400),
-            curve: Curves.easeInOutCubic,
-          );
         },
       ),
     );
